@@ -5,6 +5,8 @@ class HttpResponseWrapper implements HttpResponse {
   
   Session get session() => _session;
   
+  DetachedSocket detachSocket() => _response.detachSocket();
+  
   HttpResponseWrapper.wrap(HttpResponse response, SessionManager sessionManager) {
     _response = response;
     _sessionManager = sessionManager;

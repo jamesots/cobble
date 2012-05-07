@@ -27,6 +27,17 @@ class Server {
     });
   }
   
+  void mapRequestHandlers(Map<String, Object> map) {
+    for (Dynamic key in map.getKeys()) {
+      RegExp re = new RegExp(key);
+      addRequestHandler((HttpRequest request) {
+        var matches = re.hasMatch(request.path);
+        print("checking ${request.path} against $key, matches: $matches");
+        return matches;
+      }, map[key]);
+    }
+  }
+  
   void set defaultRequestHandler(Object handler) {
     _server.defaultRequestHandler = (HttpRequest request, HttpResponse response) {
       print("handling request with default wrapped handler, path: ${request.path}");

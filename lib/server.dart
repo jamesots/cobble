@@ -38,6 +38,27 @@ class Server {
     }
   }
   
+  void mapRequestHandlersForMimeType(String mimeType, Map<String, Object> map) {
+    for (Dynamic key in map.getKeys()) {
+      RegExp re = new RegExp(key);
+      addRequestHandler((HttpRequest request) {
+        var accepts = request.headers['Accept'];
+        if (accepts == null) {
+          return false;
+        }
+        for (var accept in accepts) {
+          //TODO this is crude
+          if (accept.contains(mimeType)) {
+            var matches = re.hasMatch(request.path);
+            print("checking ${request.path} against $key, matches: $matches");
+            return matches;
+          }
+        }
+        return false;
+      }, map[key]);
+    }
+  }
+  
   void set defaultRequestHandler(Object handler) {
     _server.defaultRequestHandler = (HttpRequest request, HttpResponse response) {
       print("handling request with default wrapped handler, path: ${request.path}");

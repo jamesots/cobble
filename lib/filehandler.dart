@@ -7,10 +7,10 @@ class FileHandler implements WrappedRequestHandler {
   WrappedRequestHandler _notFoundHandler;
   WrappedRequestHandler _forbiddenHandler;
   
-  WrappedRequestHandler get notFoundHandler() => _notFoundHandler;
+  WrappedRequestHandler get notFoundHandler => _notFoundHandler;
                         set notFoundHandler(var value) => _notFoundHandler = value;
   
-  WrappedRequestHandler get forbiddenHandler() => _forbiddenHandler;
+  WrappedRequestHandler get forbiddenHandler => _forbiddenHandler;
                         set forbiddenHandler(var value) => _forbiddenHandler = value;
   
   onRequest(HttpRequestWrapper request, HttpResponseWrapper response) {

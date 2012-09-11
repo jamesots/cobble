@@ -1,5 +1,5 @@
-#import('../sqljocky/lib/sqljocky.dart');
-#import('../sqljocky/options.dart');
+#import('package:sqljocky/sqljocky.dart');
+#import('package:sqljocky/options.dart');
 #import('lib/webserver.dart');
 #import('dart:io');
 
@@ -105,8 +105,6 @@ class TheHandler extends DbHandler {
 }
 
 void main() {
-  Log.initialize();
-
   OptionsFile options = new OptionsFile('connection.options');
   String user = options.getString('user');
   String password = options.getString('password');

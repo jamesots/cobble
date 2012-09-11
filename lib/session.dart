@@ -5,9 +5,11 @@
 
 class SessionManager {
   Map<String, Session> _sessions;
+  Math.Random _random;
   
   SessionManager() {
-    _sessions = new Map<String, Session>();  
+    _sessions = new Map<String, Session>();
+    _random = new Math.Random(new Date.now().millisecondsSinceEpoch);
   }
   
   String generateId() {
@@ -15,7 +17,7 @@ class SessionManager {
     do {
       StringBuffer sb = new StringBuffer();
       for (int i = 0; i < 15; i++) {
-        int charCode = (Math.random() * 26).toInt() + 65;
+        int charCode = _random.nextInt(26) + 65;
         sb.addCharCode(charCode);
       }
       id = sb.toString();
@@ -40,7 +42,7 @@ class Session {
   Map values;
   String _id;
   
-  String get id() => _id;
+  String get id => _id;
   
   Session._internal(String id) {
     values = new Map();

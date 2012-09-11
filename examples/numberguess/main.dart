@@ -1,6 +1,6 @@
 #import('../../lib/webserver.dart');
-#import('DRandom.dart');
 #import('dart:io');
+#import('dart:math', prefix:'Math');
 
 class NotFoundHandler implements WrappedRequestHandler {
   onRequest(HttpRequestWrapper request, HttpResponseWrapper response) {
@@ -12,10 +12,10 @@ NOT FOUND
 }
 
 class TheHandler implements WrappedRequestHandler {
-  DRandom rnd;
+  Math.Random rnd;
   
   TheHandler() {
-    rnd = new DRandom.withSeed(new Date.now().milliseconds);
+    rnd = new Math.Random(new Date.now().millisecondsSinceEpoch);
   }
   
   onRequest(HttpRequestWrapper request, HttpResponseWrapper response) {
@@ -25,26 +25,27 @@ class TheHandler implements WrappedRequestHandler {
     int number;
     int guess;
     int count;
+    bool noGuess = true;
     Session session = request.session;
     if (request.session == null) {
       session = response.createSession();
       print("creating session");
     }
-    Map values = session.values;
+    Map<String, int> values = session.values;
     print("got session");
     if (values["number"] == null) {
-      values["number"] = rnd.NextFromMax(100);
+      values["number"] = rnd.nextInt(100);
       values["count"] = 0;
     }
     number = values["number"];
     print("number = $number");
-    guess = null;
     if (request.queryParameters["guess"] != null) {
       try {
         guess = Math.parseInt(request.queryParameters["guess"]);
         values["count"]++;
-      } catch (BadNumberFormatException e) {
-        
+        noGuess = false;
+      } on FormatException catch (e) {
+        noGuess = true;
       }
     }
     count = values["count"];
@@ -57,14 +58,14 @@ class TheHandler implements WrappedRequestHandler {
 <body>
 <h1>Number Guessing Game</h1>
 <img src="question.png"/>""");
-    if (guess != null) {
+    if (!noGuess) {
       if (guess > number) {
         response.outputStream.writeString("<p>${guess} was too high! Try again.</p>");
       } else if (guess < number) {
         response.outputStream.writeString("<p>${guess} was too low! Try again.</p>");
       } else {
         response.outputStream.writeString("<p>Correct! Got it in ${count}. Let's do that again.</p>");
-        values["number"] = rnd.NextFromMax(100);
+        values["number"] = rnd.nextInt(100);
         count = values["count"] = 0;
       }
     } else {

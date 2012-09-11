@@ -3,7 +3,7 @@ class HttpResponseWrapper implements HttpResponse {
   SessionManager _sessionManager;
   Session _session;
   
-  Session get session() => _session;
+  Session get session => _session;
   
   DetachedSocket detachSocket() => _response.detachSocket();
   
@@ -19,16 +19,22 @@ class HttpResponseWrapper implements HttpResponse {
     return session;
   }
   
-  HttpHeaders get headers() => _response.headers;
+  HttpHeaders get headers => _response.headers;
   
-  OutputStream get outputStream() => _response.outputStream;
+  OutputStream get outputStream => _response.outputStream;
   
-  int get contentLength() => _response.contentLength;
+  int get contentLength => _response.contentLength;
       set contentLength(int value) => _response.contentLength = value;
       
-  String get reasonPhrase() => _response.reasonPhrase;
+  String get reasonPhrase => _response.reasonPhrase;
          set reasonPhrase(String value) => _response.reasonPhrase = value;
          
-  int get statusCode() => _response.statusCode;
+  int get statusCode => _response.statusCode;
       set statusCode(int value) => _response.statusCode = value;
+      
+  bool get persistentConnection => _response.persistentConnection;
+  
+  List<Cookie> get cookies => _response.cookies;
+  
+  HttpConnectionInfo get connectionInfo => _response.connectionInfo;
 }

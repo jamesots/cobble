@@ -18,21 +18,29 @@ class HttpRequestWrapper implements HttpRequest {
     }
   }
 
-  Session get session() => _session;
+  Session get session => _session;
   
-  int get contentLength() => _request.contentLength;
+  int get contentLength => _request.contentLength;
   
-  HttpHeaders get headers() => _request.headers;
+  HttpHeaders get headers => _request.headers;
   
-  InputStream get inputStream() => _request.inputStream;
+  InputStream get inputStream => _request.inputStream;
   
-  String get method() => _request.method;
+  String get method => _request.method;
   
-  String get path() => _request.path;
+  String get path => _request.path;
   
-  Map get queryParameters() => _request.queryParameters;
+  Map get queryParameters => _request.queryParameters;
   
-  String get queryString() => _request.queryString;
+  String get queryString => _request.queryString;
   
-  String get uri() => _request.uri;
+  String get uri => _request.uri;
+  
+  bool get persistentConnection => _request.persistentConnection;
+  
+  List<Cookie> get cookies => _request.cookies;
+  
+  String get protocolVersion => _request.protocolVersion;
+  
+  HttpConnectionInfo get connectionInfo => _request.connectionInfo;
 }

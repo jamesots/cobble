@@ -1,0 +1,11 @@
+name: dartwebserver
+version: 0.0.1
+description: >
+  A web server
+dependencies:
+  unittest:
+    sdk: unittest
+  logging:
+    sdk: logging
+  sqljocky:
+    git: git://github.com/jamesots/sqljocky.git

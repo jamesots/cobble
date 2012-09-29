@@ -1,6 +1,6 @@
 #import('package:sqljocky/sqljocky.dart');
 #import('package:sqljocky/options.dart');
-#import('lib/webserver.dart');
+#import('package:dartwebserver/webserver.dart');
 #import('dart:io');
 
 abstract class DbHandler implements WrappedRequestHandler {
@@ -121,7 +121,7 @@ void main() {
   File here = new File(".");
   String herePath = here.fullPathSync();
   print("here: $herePath");
-  String newPath = "${herePath}/examples/webserver/files";
+  String newPath = "${herePath}/example/files";
 
   var fileHandler = new FileHandler(newPath);
   server.listen('127.0.0.1', 8080);

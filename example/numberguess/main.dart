@@ -1,4 +1,4 @@
-#import('../../lib/webserver.dart');
+#import('package:dartwebserver/webserver.dart');
 #import('dart:io');
 #import('dart:math', prefix:'Math');
 
@@ -91,7 +91,7 @@ void main() {
   File here = new File(".");
   String herePath = here.fullPathSync();
   print("here: $herePath");
-  String newPath = "${herePath}/examples/numberguess/files";
+  String newPath = "${herePath}/example/numberguess/files";
   var fileHandler = new FileHandler(newPath);
   fileHandler.notFoundHandler = notFoundHandler;
   

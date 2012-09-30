@@ -9,3 +9,6 @@ dependencies:
     sdk: logging
   sqljocky:
     git: git://github.com/jamesots/sqljocky.git
+  optionsfile:
+    git: git://github.com/jamesots/optionsfile.git
+    

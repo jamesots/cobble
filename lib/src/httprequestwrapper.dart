@@ -1,3 +1,5 @@
+part of webserver;
+
 class HttpRequestWrapper implements HttpRequest {
   HttpRequest _request;
   SessionManager _sessionManager;

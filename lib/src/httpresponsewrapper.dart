@@ -1,3 +1,5 @@
+part of webserver;
+
 class HttpResponseWrapper implements HttpResponse {
   HttpResponse _response;
   SessionManager _sessionManager;

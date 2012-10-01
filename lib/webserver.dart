@@ -1,10 +1,10 @@
-#library('webserver');
+library webserver;
 
-#import('dart:io');
-#import('dart:math', prefix:'Math');
+import 'dart:io';
+import 'dart:math' as Math;
 
-#source('src/server.dart');
-#source('src/session.dart');
-#source('src/filehandler.dart');
-#source('src/httprequestwrapper.dart');
-#source('src/httpresponsewrapper.dart');
+part 'src/server.dart';
+part 'src/session.dart';
+part 'src/filehandler.dart';
+part 'src/httprequestwrapper.dart';
+part 'src/httpresponsewrapper.dart';

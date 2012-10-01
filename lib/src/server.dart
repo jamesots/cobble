@@ -1,3 +1,5 @@
+part of webserver;
+
 interface WrappedRequestHandler {
   void onRequest(HttpRequestWrapper request, HttpResponseWrapper response);
 }

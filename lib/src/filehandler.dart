@@ -1,3 +1,5 @@
+part of webserver;
+
 class FileHandler implements WrappedRequestHandler {
   String _path;
   FileHandler(String path) {

@@ -1,6 +1,6 @@
-#import('package:dartwebserver/webserver.dart');
-#import('dart:io');
-#import('dart:math', prefix:'Math');
+import 'package:dartwebserver/webserver.dart';
+import 'dart:io';
+import 'dart:math' as Math;
 
 class NotFoundHandler implements WrappedRequestHandler {
   onRequest(HttpRequestWrapper request, HttpResponseWrapper response) {
@@ -41,7 +41,7 @@ class TheHandler implements WrappedRequestHandler {
     print("number = $number");
     if (request.queryParameters["guess"] != null) {
       try {
-        guess = Math.parseInt(request.queryParameters["guess"]);
+        guess = int.parse(request.queryParameters["guess"]);
         values["count"]++;
         noGuess = false;
       } on FormatException catch (e) {
@@ -99,8 +99,8 @@ void main() {
   server.defaultRequestHandler = notFoundHandler;
   
   server.mapRequestHandlers({
-    @"^/$": handler,
-    @"^/one$": handler,
-    @"\.(png|txt|gif|html|jpg)$": fileHandler
+    r"^/$": handler,
+    r"^/one$": handler,
+    r"\.(png|txt|gif|html|jpg)$": fileHandler
   });
 }

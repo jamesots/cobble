@@ -1,6 +1,6 @@
 part of webserver;
 
-interface WrappedRequestHandler {
+abstract class WrappedRequestHandler {
   void onRequest(HttpRequestWrapper request, HttpResponseWrapper response);
 }
 
@@ -22,15 +22,15 @@ class Server {
       print("handling request with wrapped handler, path: ${request.path}");
       if (handler is WrappedRequestHandler) {
         WrappedRequestHandler wrappedHandler = handler;
-        wrappedHandler.onRequest(new HttpRequestWrapper.wrap(request, _sessionManager), new HttpResponseWrapper.wrap(response, _sessionManager));
+        wrappedHandler.onRequest(new HttpRequestWrapper._wrap(request, _sessionManager), new HttpResponseWrapper._wrap(response, _sessionManager, request.connectionInfo.remoteHost));
       } else {
-        handler(new HttpRequestWrapper.wrap(request, _sessionManager), new HttpResponseWrapper.wrap(response, _sessionManager));        
+        handler(new HttpRequestWrapper._wrap(request, _sessionManager), new HttpResponseWrapper._wrap(response, _sessionManager, request.connectionInfo.remoteHost));        
       }
     });
   }
   
   void mapRequestHandlers(Map<String, Object> map) {
-    for (Dynamic key in map.getKeys()) {
+    for (dynamic key in map.getKeys()) {
       RegExp re = new RegExp(key);
       addRequestHandler((HttpRequest request) {
         var matches = re.hasMatch(request.path);
@@ -41,7 +41,7 @@ class Server {
   }
   
   void mapRequestHandlersForMimeType(String mimeType, Map<String, Object> map) {
-    for (Dynamic key in map.getKeys()) {
+    for (dynamic key in map.getKeys()) {
       RegExp re = new RegExp(key);
       addRequestHandler((HttpRequest request) {
         var accepts = request.headers['Accept'];
@@ -66,9 +66,9 @@ class Server {
       print("handling request with default wrapped handler, path: ${request.path}");
       if (handler is WrappedRequestHandler) {
         WrappedRequestHandler wrappedHandler = handler;
-        wrappedHandler.onRequest(new HttpRequestWrapper.wrap(request, _sessionManager), new HttpResponseWrapper.wrap(response, _sessionManager));
+        wrappedHandler.onRequest(new HttpRequestWrapper._wrap(request, _sessionManager), new HttpResponseWrapper._wrap(response, _sessionManager, request.connectionInfo.remoteHost));
       } else {
-        handler(new HttpRequestWrapper.wrap(request, _sessionManager), new HttpResponseWrapper.wrap(response, _sessionManager));        
+        handler(new HttpRequestWrapper._wrap(request, _sessionManager), new HttpResponseWrapper._wrap(response, _sessionManager, request.connectionInfo.remoteHost));        
       }
     };
   }

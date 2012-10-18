@@ -5,7 +5,7 @@ class HttpRequestWrapper implements HttpRequest {
   SessionManager _sessionManager;
   Session _session;
   
-  HttpRequestWrapper.wrap(HttpRequest request, SessionManager sessionManager) {
+  HttpRequestWrapper._wrap(HttpRequest request, SessionManager sessionManager) {
     _request = request;
     _sessionManager = sessionManager;
     List cookies = request.headers["cookie"];
@@ -13,8 +13,9 @@ class HttpRequestWrapper implements HttpRequest {
       for (String cookie in cookies) {
         List parts = cookie.split("=");
         if (parts[0] == "DARTSESSION") {
+          var remoteHost = request.connectionInfo.remoteHost;
           String id = parts[1];
-          _session = sessionManager.findSession(id);
+          _session = sessionManager.findSession(remoteHost, id);
         }
       }
     }

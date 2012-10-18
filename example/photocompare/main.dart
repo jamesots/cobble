@@ -50,7 +50,7 @@ class TheHandler implements WrappedRequestHandler {
   }
   
   calcPage(HttpRequestWrapper request, HttpResponseWrapper response, Session session) {
-    Map<String, Dynamic> values = session.values;
+    Map<String, dynamic> values = session.values;
     print("got session");
     List<String> files = values["files"];
     int left = values["left"];

@@ -75,4 +75,6 @@ class Session {
     _id = id;
     _accessed = new Date.now();
   }
+  
+  Date lastAccessed => _accessed;
 }

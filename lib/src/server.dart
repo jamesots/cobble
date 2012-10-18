@@ -30,7 +30,7 @@ class Server {
   }
   
   void mapRequestHandlers(Map<String, Object> map) {
-    for (dynamic key in map.getKeys()) {
+    for (var key in map.getKeys()) {
       RegExp re = new RegExp(key);
       addRequestHandler((HttpRequest request) {
         var matches = re.hasMatch(request.path);
@@ -41,7 +41,7 @@ class Server {
   }
   
   void mapRequestHandlersForMimeType(String mimeType, Map<String, Object> map) {
-    for (dynamic key in map.getKeys()) {
+    for (var key in map.getKeys()) {
       RegExp re = new RegExp(key);
       addRequestHandler((HttpRequest request) {
         var accepts = request.headers['Accept'];

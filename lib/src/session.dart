@@ -76,5 +76,5 @@ class Session {
     _accessed = new Date.now();
   }
   
-  Date lastAccessed => _accessed;
+  Date get lastAccessed => _accessed;
 }

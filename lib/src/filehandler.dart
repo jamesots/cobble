@@ -15,7 +15,7 @@ class FileHandler implements WrappedRequestHandler {
   WrappedRequestHandler get forbiddenHandler => _forbiddenHandler;
                         set forbiddenHandler(var value) => _forbiddenHandler = value;
   
-  onRequest(HttpRequestWrapper request, HttpResponseWrapper response) {
+  onRequest(HttpRequest request, HttpResponse response) {
     String newPath = "${_path}${request.path}";
     File file = new File(newPath);
     if (!file.existsSync()) {

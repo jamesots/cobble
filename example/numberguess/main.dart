@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:math' as Math;
 
 class NotFoundHandler implements WrappedRequestHandler {
-  onRequest(HttpRequestWrapper request, HttpResponseWrapper response) {
+  onRequest(HttpRequest request, HttpResponse response) {
     response.outputStream.writeString("""
 NOT FOUND
 """);
@@ -18,7 +18,7 @@ class TheHandler implements WrappedRequestHandler {
     rnd = new Math.Random(new Date.now().millisecondsSinceEpoch);
   }
   
-  onRequest(HttpRequestWrapper request, HttpResponseWrapper response) {
+  onRequest(HttpRequest request, HttpResponse response) {
     print("request received");
     response.statusCode = HttpStatus.OK;
 
@@ -26,12 +26,11 @@ class TheHandler implements WrappedRequestHandler {
     int guess;
     int count;
     bool noGuess = true;
-    Session session = request.session;
-    if (request.session == null) {
-      session = response.createSession();
-      print("creating session");
+    HttpSession session = request.session();
+    if (session.data == null) {
+      session.data = new Map<String, int>();
     }
-    Map<String, int> values = session.values;
+    Map<String, int> values = session.data;
     print("got session");
     if (values["number"] == null) {
       values["number"] = rnd.nextInt(100);

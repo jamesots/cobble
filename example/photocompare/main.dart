@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:math' as Math;
 
 class NotFoundHandler implements WrappedRequestHandler {
-  onRequest(HttpRequestWrapper request, HttpResponseWrapper response) {
+  onRequest(HttpRequest request, HttpResponse response) {
     response.outputStream.writeString("""
 NOT FOUND
 """);
@@ -19,13 +19,14 @@ class TheHandler implements WrappedRequestHandler {
     rnd = new Math.Random(new Date.now().millisecondsSinceEpoch);
   }
   
-  onRequest(HttpRequestWrapper request, HttpResponseWrapper response) {
+  onRequest(HttpRequest request, HttpResponse response) {
     print("request received");
     response.statusCode = HttpStatus.OK;
 
-    Session session = request.session;
-    if (request.session == null) {
-      session = response.createSession();
+    HttpSession session = request.session();
+    if (session.data == null) {
+      session.data = new Map<String, dynamic>();
+      var values = session.data;
       // look up existing files
       var dir = new Directory(_path);
       var list = dir.list();
@@ -35,12 +36,12 @@ class TheHandler implements WrappedRequestHandler {
         files.add(f);
       };
       list.onDone = (completed) {
-        session.values["files"] = files;
-        session.values["left"] = 0;
-        session.values["right"] = 1;
+        values["files"] = files;
+        values["left"] = 0;
+        values["right"] = 1;
         var prefs = [];
         prefs.insertRange(0, files.length, 0);
-        session.values["prefs"] = prefs;
+        values["prefs"] = prefs;
         calcPage(request, response, session);
       };
       print("creating session");
@@ -49,8 +50,8 @@ class TheHandler implements WrappedRequestHandler {
     }
   }
   
-  calcPage(HttpRequestWrapper request, HttpResponseWrapper response, Session session) {
-    Map<String, dynamic> values = session.values;
+  calcPage(HttpRequest request, HttpResponse response, HttpSession session) {
+    Map<String, dynamic> values = session.data;
     print("got session");
     List<String> files = values["files"];
     int left = values["left"];
@@ -83,8 +84,8 @@ class TheHandler implements WrappedRequestHandler {
     showPage(response, image1, image2);
   }
   
-  showResult(HttpResponseWrapper response, Session session) {
-    var values = session.values;
+  showResult(HttpResponse response, HttpSession session) {
+    var values = session.data;
     var maxval = 0;
     var maxitem = 0;
     for (var i = 0; i < values["prefs"].length; i++) {
@@ -109,7 +110,7 @@ class TheHandler implements WrappedRequestHandler {
     response.outputStream.close();
   }
   
-  showPage(HttpResponseWrapper response, String image1, String image2) {
+  showPage(HttpResponse response, String image1, String image2) {
     response.outputStream.writeString("""
 <html>
 <head>

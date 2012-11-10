@@ -23,7 +23,7 @@ class SqlHandler extends DbHandler {
   SqlHandler(String user, String password, String host, String db, int port) :
     super(user, password, host, db, port);
 
-  onRequest(HttpRequestWrapper request, HttpResponseWrapper response) {
+  onRequest(HttpRequest request, HttpResponse response) {
     void writeIt(var fieldNames, var results) {
       response.outputStream.writeString("""
 <html>
@@ -65,25 +65,26 @@ class TheHandler extends DbHandler {
   TheHandler(String user, String password, String host, String db, int port) :
     super(user, password, host, db, port);
   
-  onRequest(HttpRequestWrapper request, HttpResponseWrapper response) {
+  onRequest(HttpRequest request, HttpResponse response) {
     print("request received");
     response.statusCode = HttpStatus.OK;
 
     String name = "";
-    if (request.session == null) {
-      response.createSession();
-      print("creating session");
+    var session = request.session();
+    if (session.data == null) {
+      session.data = new Map<String, dynamic>();
+      print("new session");
     } else {
       print("got session");
       if (request.queryParameters["name"] != null) {
         print("got param");
         name = request.queryParameters["name"];
         print("name is $name");
-        request.session.values["name"] = name;
+        session.data["name"] = name;
         print("stored name");
       } else {
         print("get naem from session");
-        name = request.session.values["name"];
+        name = session.data["name"];
         print("name is $name");
       }
     }

@@ -7,6 +7,7 @@ dependencies:
     sdk: unittest
   logging:
     sdk: logging
-  sqljocky: any
+  sqljocky: 
+    git: git@github.com:jamesots/sqljocky.git
   options_file: any
     

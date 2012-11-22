@@ -67,54 +67,61 @@ class Server {
   
   void mapRestHandlers(Map<String, RestHandler> map) {
     for (var key in map.keys) {
-      RegExp re = new RegExp(key);
-      var matcher = (HttpRequest request) {
-        var header;
-        if (request.method == "GET" || request.method == "HEAD") {
-          header = "Accept";
-        } else if (request.method == "PUT" || request.method == "POST") {
-          header = "Content-Type";
-        }
-        var value = request.headers[header];
-        if (value == null) {
-          return false;
-        }
-        for (var accept in value) {
-          //TODO this is crude
-          if (accept.contains('application/json')) {
-            var matches = re.hasMatch(request.path);
-            print("checking ${request.path} against $key, matches: $matches");
-            return matches;
-          }
-        }
-        return false;
-      };
-      var restHandler = map[key];
-      var handler = (HttpRequest request, HttpResponse response) {
-        if (!restHandler.authenticated(request, response)) {
-          restHandler.forbidden(request, response);
-        } else {
-          response.headers.add("Content-Type", "application/json");
-          switch (request.method) {
-            case "GET":
-              restHandler.onGet(request, response);
-              break;
-            case "POST":
-              restHandler.onPost(request, response);
-              break;
-            case "PUT": 
-              restHandler.onPut(request, response);
-              break;
-            case "DELETE": 
-              restHandler.onDelete(request, response);
-              break;
-            default:
-              restHandler.methodNotImplemented(request, response);
-          }
-        }
-      };
+      var matcher = _getRestMatcher(key);
+      var handler = _getRestHandler(map[key]);
       addRequestHandler(matcher, handler);
     }
+  }
+
+  Matcher _getRestMatcher(key) {
+    RegExp re = new RegExp(key);
+    return (HttpRequest request) {
+      var header;
+      if (request.method == "GET" || request.method == "HEAD") {
+        header = "Accept";
+      } else if (request.method == "PUT" || request.method == "POST") {
+        header = "Content-Type";
+      }
+      var value = request.headers[header];
+      if (value == null) {
+        return false;
+      }
+      for (var accept in value) {
+        //TODO this is crude, see http://www.xml.com/pub/a/2005/06/08/restful.html
+        if (accept.contains('application/json')) {
+          var matches = re.hasMatch(request.path);
+          print("checking ${request.path} against $key, matches: $matches");
+          return matches;
+        }
+      }
+      return false;
+    };
+  }
+
+  RequestHandler _getRestHandler(RestHandler restHandler) {
+    return (HttpRequest request, HttpResponse response) {
+      if (!restHandler.authenticated(request, response)) {
+        restHandler.forbidden(request, response);
+      } else {
+        response.headers.add("Content-Type", "application/json");
+        switch (request.method) {
+          case "GET":
+            restHandler.onGet(request, response);
+            break;
+          case "POST":
+            restHandler.onPost(request, response);
+            break;
+          case "PUT": 
+            restHandler.onPut(request, response);
+            break;
+          case "DELETE": 
+            restHandler.onDelete(request, response);
+            break;
+          default:
+            restHandler.methodNotImplemented(request, response);
+        }
+      }
+    };
   }
   
   void set errorHandler(ErrorHandler handler) {

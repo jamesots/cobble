@@ -89,7 +89,30 @@ class Server {
         }
         return false;
       };
-      addRequestHandler(matcher, map[key]);
+      var restHandler = map[key];
+      var handler = (HttpRequest request, HttpResponse response) {
+        if (!restHandler.authenticated(request, response)) {
+          restHandler.forbidden(request, response);
+        } else {
+          switch (request.method) {
+            case "GET":
+              restHandler.onGet(request, response);
+              break;
+            case "POST":
+              restHandler.onPost(request, response);
+              break;
+            case "PUT": 
+              restHandler.onPut(request, response);
+              break;
+            case "DELETE": 
+              restHandler.onDelete(request, response);
+              break;
+            default:
+              restHandler.methodNotImplemented(request, response);
+          }
+        }
+      };
+      addRequestHandler(matcher, handler);
     }
   }
   

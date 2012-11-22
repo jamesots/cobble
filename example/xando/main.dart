@@ -94,6 +94,8 @@ class TheHandler implements WrappedRequestHandler {
   onRequest(HttpRequest request, HttpResponse response) {
     print("request received");
     response.statusCode = HttpStatus.OK;
+    response.outputStream.writeString("Hello");
+    throw "oops";
 
     HttpSession session = request.session();
     if (session.data == null) {
@@ -155,6 +157,7 @@ void main() {
   server.defaultRequestHandler = notFoundHandler;
   
   server.mapRequestHandlers({
+//    r"x": "hello",
     r"^/$": handler
   });
 }

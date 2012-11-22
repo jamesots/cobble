@@ -94,6 +94,7 @@ class Server {
         if (!restHandler.authenticated(request, response)) {
           restHandler.forbidden(request, response);
         } else {
+          response.headers.add("Content-Type", "application/json");
           switch (request.method) {
             case "GET":
               restHandler.onGet(request, response);

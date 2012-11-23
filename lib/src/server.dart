@@ -76,11 +76,19 @@ class Server {
   Matcher _getRestMatcher(key) {
     RegExp re = new RegExp(key);
     return (HttpRequest request) {
+      if (request.method == "DELETE") {
+        var matches = re.hasMatch(request.path);
+        print("checking ${request.path} against $key, matches: $matches");
+        return matches;
+      }
       var header;
       if (request.method == "GET" || request.method == "HEAD") {
         header = "Accept";
       } else if (request.method == "PUT" || request.method == "POST") {
         header = "Content-Type";
+      }
+      if (header == null) {
+        return false;
       }
       var value = request.headers[header];
       if (value == null) {

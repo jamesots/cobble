@@ -2,8 +2,11 @@ part of webserver;
 
 class FileHandler implements WrappedRequestHandler {
   String _path;
-  FileHandler(String path) {
+  String _trim;
+  FileHandler(String path, {String trim}) {
     _path = path;
+    _trim = trim;
+    
   }
   
   WrappedRequestHandler _notFoundHandler;
@@ -16,7 +19,11 @@ class FileHandler implements WrappedRequestHandler {
                         set forbiddenHandler(var value) => _forbiddenHandler = value;
   
   onRequest(HttpRequest request, HttpResponse response) {
-    String newPath = "${_path}${request.path}";
+    var path = request.path;
+    if (_trim != null && path.startsWith(_trim)) {
+      path = path.substring(_trim.length);
+    }
+    String newPath = "${_path}${path}";
     File file = new File(newPath);
     if (!file.existsSync()) {
       print("File doesn't exist: ${newPath}");

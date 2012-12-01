@@ -3,11 +3,10 @@ version: 0.0.2
 description: >
   A web server
 dependencies:
-  unittest:
-    sdk: unittest
-  logging:
-    sdk: logging
+  unittest: any
+  logging: any
   sqljocky: 
     git: git@github.com:jamesots/sqljocky.git
-  options_file: any
+  options_file:
+    git: git@github.com:jamesots/optionsfile.git
     

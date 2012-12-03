@@ -9,13 +9,12 @@ abstract class DbHandler implements WrappedRequestHandler {
   String _host;
   String _db;
   int _port;
-  Connection _cnx;
+  ConnectionPool _pool;
   
   DbHandler(String this._user, String this._password, String this._host, String this._db, int this._port);
   
   Future connect() {
-    _cnx = new Connection();
-    return _cnx.connect(user: _user, password: _password, host: _host, db: _db, port: _port);
+    _pool = new ConnectionPool(user: _user, password: _password, host: _host, db: _db, port: _port);
   }
 }
 
@@ -44,10 +43,10 @@ class SqlHandler extends DbHandler {
     if (request.queryParameters["sql"] != null) {
       connect().chain((x) {
         print("connected");
-        return _cnx.query(request.queryParameters["sql"]);
+        return _pool.query(request.queryParameters["sql"]);
       }).then((Results results) {
         print("got results");
-        _cnx.close();
+        _pool.close();
         List<String> fieldNames = new List<String>();
         for (Field field in results.fields) {
           fieldNames.add("${field.name}:${field.type}");

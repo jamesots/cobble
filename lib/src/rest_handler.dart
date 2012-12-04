@@ -38,7 +38,7 @@ abstract class RestHandler extends WrappedRequestHandler {
   }
   
   void onRequest(HttpRequest request, HttpResponse response) {
-    throw "onRequest should no bev called on a RestHandler";
+    throw "onRequest should not be called on a RestHandler";
   }
 
   bool checkAuthenticated(HttpRequest request, HttpResponse response);

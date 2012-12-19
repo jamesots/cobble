@@ -5,8 +5,5 @@ description: >
 dependencies:
   unittest: any
   logging: any
-  sqljocky: 
-    git: git@github.com:jamesots/sqljocky.git
-  options_file:
-    git: git@github.com:jamesots/optionsfile.git
-    
+  sqljocky: any
+  options_file: any    

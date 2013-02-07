@@ -2,6 +2,7 @@ import 'package:sqljocky/sqljocky.dart';
 import 'package:options_file/options_file.dart';
 import 'package:dartwebserver/webserver.dart';
 import 'dart:io';
+import 'dart:async';
 
 abstract class DbHandler implements WrappedRequestHandler {
   String _user;
@@ -41,7 +42,7 @@ class SqlHandler extends DbHandler {
       response.outputStream.close();
     };
     if (request.queryParameters["sql"] != null) {
-      connect().chain((x) {
+      connect().then((x) {
         print("connected");
         return _pool.query(request.queryParameters["sql"]);
       }).then((Results results) {

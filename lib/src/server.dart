@@ -17,7 +17,7 @@ class Server {
   WrappedRequestHandler _defaultHandler;
   
   Server() {
-    _handlers = new Map<Matcher, Object>();
+    _handlers = new Map<Matcher, WrappedRequestHandler>();
   }
   
   Future listen(String host, int port) {
@@ -27,12 +27,12 @@ class Server {
     });
   }
   
-  addRequestHandler(Matcher matcher, Object handler) {
+  addRequestHandler(Matcher matcher, WrappedRequestHandler handler) {
     _handlers[matcher] = handler;
   }
   
-  set defaultRequestHandler(Object handler) => _defaultHandler = handler;
-  Object get defaultRequestHandler => _defaultHandler;
+  set defaultRequestHandler(WrappedRequestHandler handler) => _defaultHandler = handler;
+  WrappedRequestHandler get defaultRequestHandler => _defaultHandler;
   
   RequestHandler _getCheckedRequestHandler(Object handler) {
     RequestHandler method = _getHandlerMethod(handler);

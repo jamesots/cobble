@@ -34,7 +34,7 @@ abstract class RestHandler extends WrappedRequestHandler {
   methodNotImplemented(HttpRequest request, HttpResponse response) {
     response.statusCode = HttpStatus.NOT_IMPLEMENTED;
     response.reasonPhrase = "Method not implemented: ${request.method}";
-    response.outputStream.close();
+    response.close();
   }
   
   void onRequest(HttpRequest request, HttpResponse response) {
@@ -53,13 +53,13 @@ abstract class RestHandler extends WrappedRequestHandler {
   void forbidden(HttpRequest request, HttpResponse response) {
     response.statusCode = HttpStatus.FORBIDDEN;
     response.reasonPhrase = "Forbidden";
-    response.outputStream.close();
+    response.close();
   }
   
   void notAllowed(HttpRequest request, HttpResponse response) {
     response.statusCode = HttpStatus.METHOD_NOT_ALLOWED;
     response.reasonPhrase = "Method not allowed: ${request.method}";
-    response.outputStream.close();
+    response.close();
   }
   
   onGet(HttpRequest request, HttpResponse response) {
@@ -76,18 +76,19 @@ abstract class RestHandler extends WrappedRequestHandler {
   }
   
   Future<String> readAll(HttpRequest request) {
-    var completer = new Completer<String>();
-    var payloadStream = new StringInputStream(request.inputStream);
-    var payload = new StringBuffer();
-    payloadStream.onLine = () {
-      var line;
-      while ((line = payloadStream.readLine()) != null) {
-        payload.add(line);
-      }
-    };
-    payloadStream.onClosed = () {
-      completer.complete(payload.toString());
-    };
-    return completer.future;
+    return request.join();
+//    var completer = new Completer<String>();
+//    var payloadStream = new StringInputStream(request.inputStream);
+//    var payload = new StringBuffer();
+//    payloadStream.onLine = () {
+//      var line;
+//      while ((line = payloadStream.readLine()) != null) {
+//        payload.add(line);
+//      }
+//    };
+//    payloadStream.onClosed = () {
+//      completer.complete(payload.toString());
+//    };
+//    return completer.future;
   }
 }

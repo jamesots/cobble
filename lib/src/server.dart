@@ -13,28 +13,32 @@ typedef bool Matcher(HttpRequest request);
 class Server {
   HttpServer _server;
   ErrorHandler _errorHandler;
+  Map<Matcher, WrappedRequestHandler> _handlers;
+  WrappedRequestHandler _defaultHandler;
   
   Server() {
-    _server = new HttpServer();
+    _handlers = new Map<Matcher, Object>();
   }
   
-  void listen(String host, int port) {
-    _server.listen(host, port);
+  Future listen(String host, int port) {
+    return HttpServer.bind(host, port).then((server) {
+      _server = server;
+      server.listen(handleRequest);
+    });
   }
   
-  void addRequestHandler(Matcher matcher, Object handler) {
-    _server.addRequestHandler(matcher, _getCheckedRequestHandler(handler));
+  addRequestHandler(Matcher matcher, Object handler) {
+    _handlers[matcher] = handler;
   }
   
-  void set defaultRequestHandler(Object handler) {
-    _server.defaultRequestHandler = _getCheckedRequestHandler(handler);
-  }
+  set defaultRequestHandler(Object handler) => _defaultHandler = handler;
+  Object get defaultRequestHandler => _defaultHandler;
   
   RequestHandler _getCheckedRequestHandler(Object handler) {
     RequestHandler method = _getHandlerMethod(handler);
     return (HttpRequest request, HttpResponse response) {
       try {
-        print("handling request, path: ${request.path}");
+        print("handling request, path: ${request.uri.path}");
         method(request, response);
       } catch (e) {
         handleError(request, response, e);
@@ -54,12 +58,24 @@ class Server {
     return method;
   }
   
+  void handleRequest(HttpRequest request) {
+    _handlers.keys.firstWhere((matcher) {
+      if (matcher(request)) {
+        _handlers[matcher].onRequest(request, request.response);
+        return true;
+      }
+      return false;
+    }, orElse: () {
+      _defaultHandler.onRequest(request, request.response);
+    });
+  }
+  
   void mapRequestHandlers(Map<String, Object> map) {
     for (var key in map.keys) {
       RegExp re = new RegExp(key);
       addRequestHandler((HttpRequest request) {
-        var matches = re.hasMatch(request.path);
-        print("checking ${request.path} against $key, matches: $matches");
+        var matches = re.hasMatch(request.uri.path);
+        print("checking ${request.uri.path} against $key, matches: $matches");
         return matches;
       }, map[key]);
     }
@@ -77,8 +93,8 @@ class Server {
     RegExp re = new RegExp(key);
     return (HttpRequest request) {
       if (request.method == "DELETE") {
-        var matches = re.hasMatch(request.path);
-        print("checking ${request.path} against $key, matches: $matches");
+        var matches = re.hasMatch(request.uri.path);
+        print("checking ${request.uri.path} against $key, matches: $matches");
         return matches;
       }
       var header;
@@ -97,8 +113,8 @@ class Server {
       for (var accept in value) {
         //TODO this is crude, see http://www.xml.com/pub/a/2005/06/08/restful.html
         if (accept.contains('application/json')) {
-          var matches = re.hasMatch(request.path);
-          print("checking ${request.path} against $key, matches: $matches");
+          var matches = re.hasMatch(request.uri.path);
+          print("checking ${request.uri.path} against $key, matches: $matches");
           return matches;
         }
       }
@@ -157,12 +173,12 @@ class Server {
       print("Can't send header to stream: $e");
     }
     try {
-      response.outputStream.writeString("Error handling request: ${error}");
+      response.write("Error handling request: ${error}");
     } catch (e) {
       print("Can't write to stream: $e");
     }
     try {
-      response.outputStream.close();
+      response.close();
     } catch (e) {
       print("Can't close stream: $e");
     }

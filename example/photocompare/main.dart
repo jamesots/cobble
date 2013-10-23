@@ -4,10 +4,10 @@ import 'dart:math' as Math;
 
 class NotFoundHandler implements WrappedRequestHandler {
   onRequest(HttpRequest request, HttpResponse response) {
-    response.outputStream.writeString("""
+    response.write("""
 NOT FOUND
 """);
-    response.outputStream.close();
+    response.close();
   }
 }
 
@@ -16,34 +16,32 @@ class TheHandler implements WrappedRequestHandler {
   String _path;
   
   TheHandler(this._path) {
-    rnd = new Math.Random(new Date.now().millisecondsSinceEpoch);
+    rnd = new Math.Random(new DateTime.now().millisecondsSinceEpoch);
   }
   
   onRequest(HttpRequest request, HttpResponse response) {
     print("request received");
     response.statusCode = HttpStatus.OK;
 
-    HttpSession session = request.session();
-    if (session.data == null) {
-      session.data = new Map<String, dynamic>();
-      var values = session.data;
+    HttpSession session = request.session;
+    if (session.isNew) {
       // look up existing files
       var dir = new Directory(_path);
-      var list = dir.list();
       var files = [];
-      list.onFile = (filename) {
-        var f = filename.substring(filename.lastIndexOf("/"));
+      dir.list().listen((file) {
+        var f = file.absolute.path.substring(file.absolute.path.lastIndexOf("/"));
         files.add(f);
-      };
-      list.onDone = (completed) {
-        values["files"] = files;
-        values["left"] = 0;
-        values["right"] = 1;
+      }, onDone: () {
+        session["files"] = files;
+        session["left"] = 0;
+        session["right"] = 1;
         var prefs = [];
-        prefs.insertRange(0, files.length, 0);
-        values["prefs"] = prefs;
+        for (var i = 0; i < files.length; i++) {
+          prefs.add(0);
+        }
+        session["prefs"] = prefs;
         calcPage(request, response, session);
-      };
+      });
       print("creating session");
     } else {
       calcPage(request, response, session);
@@ -51,19 +49,18 @@ class TheHandler implements WrappedRequestHandler {
   }
   
   calcPage(HttpRequest request, HttpResponse response, HttpSession session) {
-    Map<String, dynamic> values = session.data;
     print("got session");
-    List<String> files = values["files"];
-    int left = values["left"];
-    int right = values["right"];
-    if (request.queryParameters["pref"] != null) {
+    List<String> files = session["files"];
+    int left = session["left"];
+    int right = session["right"];
+    if (request.uri.queryParameters["pref"] != null) {
       try {
-        var pref = int.parse(request.queryParameters["pref"]);
+        var pref = int.parse(request.uri.queryParameters["pref"]);
         if (pref == 1) {
-          values["prefs"][left]++;
+          session["prefs"][left]++;
         }
         if (pref == 2) {
-          values["prefs"][right]++;
+          session["prefs"][right]++;
         }
         right++;
         if (right == files.length) {
@@ -77,25 +74,24 @@ class TheHandler implements WrappedRequestHandler {
       } on FormatException catch (e) {
       }
     }
-    values["left"] = left;
-    values["right"] = right;
+    session["left"] = left;
+    session["right"] = right;
     var image1 = files[left];
     var image2 = files[right];
     showPage(response, image1, image2);
   }
   
   showResult(HttpResponse response, HttpSession session) {
-    var values = session.data;
     var maxval = 0;
     var maxitem = 0;
-    for (var i = 0; i < values["prefs"].length; i++) {
-      if (values["prefs"][i] > maxval) {
-        maxval = values["prefs"][i];
+    for (var i = 0; i < session["prefs"].length; i++) {
+      if (session["prefs"][i] > maxval) {
+        maxval = session["prefs"][i];
         maxitem = i;
       }
     }
-    var image = values["files"][maxitem];
-    response.outputStream.writeString("""
+    var image = session["files"][maxitem];
+    response.write("""
 <html>
 <head>
 <title>Photo Compare</title>
@@ -107,11 +103,11 @@ class TheHandler implements WrappedRequestHandler {
 </body>
 </html>
 """);
-    response.outputStream.close();
+    response.close();
   }
   
   showPage(HttpResponse response, String image1, String image2) {
-    response.outputStream.writeString("""
+    response.write("""
 <html>
 <head>
 <title>Photo Compare</title>
@@ -129,7 +125,7 @@ Which image do you prefer?
 </body>
 </html>
 """);
-    response.outputStream.close();
+    response.close();
   }
 }
 
@@ -138,7 +134,7 @@ void main() {
   var notFoundHandler = new NotFoundHandler();
 
   File here = new File(".");
-  String herePath = here.fullPathSync();
+  String herePath = here.absolute.path;
   print("here: $herePath");
   String newPath = "${herePath}/example/photocompare/files";
   var fileHandler = new FileHandler(newPath);

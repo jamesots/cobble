@@ -6,7 +6,6 @@ class FileHandler implements WrappedRequestHandler {
   FileHandler(String path, {String trim}) {
     _path = path;
     _trim = trim;
-    
   }
   
   WrappedRequestHandler _notFoundHandler;
@@ -19,7 +18,7 @@ class FileHandler implements WrappedRequestHandler {
                         set forbiddenHandler(var value) => _forbiddenHandler = value;
   
   onRequest(HttpRequest request, HttpResponse response) {
-    var path = request.path;
+    var path = request.uri.path;
     if (_trim != null && path.startsWith(_trim)) {
       path = path.substring(_trim.length);
     }
@@ -31,26 +30,28 @@ class FileHandler implements WrappedRequestHandler {
         _notFoundHandler.onRequest(request, response);
       } else {
         response.statusCode = HttpStatus.NOT_FOUND;
-        response.outputStream.writeString("Not found!");
-        response.outputStream.close();
+        response.write("Not found!");
+        response.close();
       }
       return;
     }
-    String filePath = file.fullPathSync();
+    String filePath = file.absolute.path;
     
     if (!filePath.startsWith(_path)) {
-      print("Trying to load file outsite of file directory: ${file.fullPathSync()}");
+      print("Trying to load file outsite of file directory: ${file.absolute.path}");
       if (_forbiddenHandler != null) {
         _forbiddenHandler.onRequest(request, response);
       } else {
         response.statusCode = HttpStatus.FORBIDDEN;
-        response.outputStream.writeString("Go away!");
-        response.outputStream.close();
+        response.write("Go away!");
+        response.close();
       }
     } else {
       response.statusCode = HttpStatus.OK;
       
-      file.openInputStream().pipe(response.outputStream);
+      response.addStream(file.openRead()).then((_) {
+        response.close();
+      });
     }
   }
 }

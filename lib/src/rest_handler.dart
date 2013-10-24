@@ -24,7 +24,7 @@ class _AuthRequired {
   }
 }
 
-abstract class RestHandler extends WrappedRequestHandler {
+abstract class RestHandler extends RequestHandler {
   _AuthRequired _authRequired;
 
   RestHandler([bool getAuthRequired=true, bool postAuthRequired=true, bool putAuthRequired=true, bool deleteAuthRequired=true]) {

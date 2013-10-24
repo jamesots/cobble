@@ -1,23 +1,23 @@
 part of webserver;
 
-abstract class WrappedRequestHandler {
+abstract class RequestHandler {
   void onRequest(HttpRequest request, HttpResponse response);
 }
 
-typedef void RequestHandler(HttpRequest request, HttpResponse response);
+typedef void RequestHandlerMethod(HttpRequest request, HttpResponse response);
 
-typedef void ErrorHandler(HttpRequest request, HttpResponse response, var error);
+typedef void ErrorHandlerMethod(HttpRequest request, HttpResponse response, var error);
 
 typedef bool Matcher(HttpRequest request);
 
 class Server {
   HttpServer _server;
-  ErrorHandler _errorHandler;
-  Map<Matcher, WrappedRequestHandler> _handlers;
-  WrappedRequestHandler _defaultHandler;
+  ErrorHandlerMethod _errorHandler;
+  Map<Matcher, RequestHandler> _handlers;
+  RequestHandler _defaultHandler;
   
   Server() {
-    _handlers = new Map<Matcher, WrappedRequestHandler>();
+    _handlers = new Map<Matcher, RequestHandler>();
   }
   
   Future listen(String host, int port) {
@@ -27,36 +27,12 @@ class Server {
     });
   }
   
-  addRequestHandler(Matcher matcher, WrappedRequestHandler handler) {
+  addRequestHandler(Matcher matcher, RequestHandler handler) {
     _handlers[matcher] = handler;
   }
   
-  set defaultRequestHandler(WrappedRequestHandler handler) => _defaultHandler = handler;
-  WrappedRequestHandler get defaultRequestHandler => _defaultHandler;
-  
-  RequestHandler _getCheckedRequestHandler(Object handler) {
-    RequestHandler method = _getHandlerMethod(handler);
-    return (HttpRequest request, HttpResponse response) {
-      try {
-        print("handling request, path: ${request.uri.path}");
-        method(request, response);
-      } catch (e) {
-        handleError(request, response, e);
-      }
-    };
-  }
-  
-  RequestHandler _getHandlerMethod(Object handler) {
-    RequestHandler method;
-    if (handler is WrappedRequestHandler) {
-      method = (handler as WrappedRequestHandler).onRequest;
-    } else if (handler is RequestHandler) {
-      method = handler;
-    } else {
-      throw "handler must be a WrappedRequestHandler or a RequestHandler";
-    }
-    return method;
-  }
+  set defaultRequestHandler(RequestHandler handler) => _defaultHandler = handler;
+  RequestHandler get defaultRequestHandler => _defaultHandler;
   
   void handleRequest(HttpRequest request) {
     _handlers.keys.firstWhere((matcher) {
@@ -70,7 +46,7 @@ class Server {
     });
   }
   
-  void mapRequestHandlers(Map<String, Object> map) {
+  void mapRequestHandlers(Map<String, RequestHandler> map) {
     for (var key in map.keys) {
       RegExp re = new RegExp(key);
       addRequestHandler((HttpRequest request) {
@@ -122,7 +98,7 @@ class Server {
     };
   }
 
-  RequestHandler _getRestHandler(RestHandler restHandler) {
+  RequestHandlerMethod _getRestHandler(RestHandler restHandler) {
     return (HttpRequest request, HttpResponse response) {
       if (!restHandler.authenticated(request, response)) {
         restHandler.forbidden(request, response);
@@ -148,7 +124,7 @@ class Server {
     };
   }
   
-  void set errorHandler(ErrorHandler handler) {
+  void set errorHandler(ErrorHandlerMethod handler) {
     _errorHandler = handler;
   }
   

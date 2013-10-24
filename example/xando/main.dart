@@ -75,7 +75,7 @@ class Board {
   }
 }
 
-class NotFoundHandler implements WrappedRequestHandler {
+class NotFoundHandler implements RequestHandler {
   onRequest(HttpRequest request, HttpResponse response) {
     response.write("""
 NOT FOUND
@@ -84,7 +84,7 @@ NOT FOUND
   }
 }
 
-class TheHandler implements WrappedRequestHandler {
+class TheHandler implements RequestHandler {
   Math.Random rnd;
   
   TheHandler() {
@@ -93,10 +93,6 @@ class TheHandler implements WrappedRequestHandler {
   
   onRequest(HttpRequest request, HttpResponse response) {
     print("request received");
-    response.statusCode = HttpStatus.OK;
-    response.write("Hello");
-    throw "oops";
-
     HttpSession session = request.session;
     if (session.isNew) {
       var board = new Board();

@@ -4,7 +4,7 @@ import 'package:dartwebserver/webserver.dart';
 import 'dart:io';
 import 'dart:async';
 
-abstract class DbHandler implements WrappedRequestHandler {
+abstract class DbHandler implements RequestHandler {
   String _user;
   String _password;
   String _host;

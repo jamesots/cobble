@@ -2,7 +2,7 @@ import 'package:dartwebserver/webserver.dart';
 import 'dart:io';
 import 'dart:math' as Math;
 
-class NotFoundHandler implements WrappedRequestHandler {
+class NotFoundHandler implements RequestHandler {
   onRequest(HttpRequest request, HttpResponse response) {
     response.write("""
 NOT FOUND
@@ -11,7 +11,7 @@ NOT FOUND
   }
 }
 
-class TheHandler implements WrappedRequestHandler {
+class TheHandler implements RequestHandler {
   Math.Random rnd;
   String _path;
   

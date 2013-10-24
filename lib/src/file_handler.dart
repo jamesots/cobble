@@ -1,6 +1,6 @@
 part of webserver;
 
-class FileHandler implements WrappedRequestHandler {
+class FileHandler implements RequestHandler {
   String _path;
   String _trim;
   FileHandler(String path, {String trim}) {
@@ -8,13 +8,13 @@ class FileHandler implements WrappedRequestHandler {
     _trim = trim;
   }
   
-  WrappedRequestHandler _notFoundHandler;
-  WrappedRequestHandler _forbiddenHandler;
+  RequestHandler _notFoundHandler;
+  RequestHandler _forbiddenHandler;
   
-  WrappedRequestHandler get notFoundHandler => _notFoundHandler;
+  RequestHandler get notFoundHandler => _notFoundHandler;
                         set notFoundHandler(var value) => _notFoundHandler = value;
   
-  WrappedRequestHandler get forbiddenHandler => _forbiddenHandler;
+  RequestHandler get forbiddenHandler => _forbiddenHandler;
                         set forbiddenHandler(var value) => _forbiddenHandler = value;
   
   onRequest(HttpRequest request, HttpResponse response) {

@@ -30,7 +30,9 @@ class TheHandler implements WrappedRequestHandler {
       var files = [];
       dir.list().listen((file) {
         var f = file.absolute.path.substring(file.absolute.path.lastIndexOf("/"));
-        files.add(f);
+        if (f.endsWith(".jpg")) {
+          files.add(f);
+        }
       }, onDone: () {
         session["files"] = files;
         session["left"] = 0;

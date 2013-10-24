@@ -4,10 +4,10 @@ import 'dart:math' as Math;
 
 class NotFoundHandler implements WrappedRequestHandler {
   onRequest(HttpRequest request, HttpResponse response) {
-    response.outputStream.writeString("""
+    response.write("""
 NOT FOUND
 """);
-    response.outputStream.close();
+    response.close();
   }
 }
 
@@ -15,7 +15,7 @@ class TheHandler implements WrappedRequestHandler {
   Math.Random rnd;
   
   TheHandler() {
-    rnd = new Math.Random(new Date.now().millisecondsSinceEpoch);
+    rnd = new Math.Random(new DateTime.now().millisecondsSinceEpoch);
   }
   
   onRequest(HttpRequest request, HttpResponse response) {
@@ -26,30 +26,26 @@ class TheHandler implements WrappedRequestHandler {
     int guess;
     int count;
     bool noGuess = true;
-    HttpSession session = request.session();
-    if (session.data == null) {
-      session.data = new Map<String, int>();
-    }
-    Map<String, int> values = session.data;
+    HttpSession session = request.session;
     print("got session");
-    if (values["number"] == null) {
-      values["number"] = rnd.nextInt(100);
-      values["count"] = 0;
+    if (session["number"] == null) {
+      session["number"] = rnd.nextInt(100);
+      session["count"] = 0;
     }
-    number = values["number"];
+    number = session["number"];
     print("number = $number");
-    if (request.queryParameters["guess"] != null) {
+    if (request.uri.queryParameters["guess"] != null) {
       try {
-        guess = int.parse(request.queryParameters["guess"]);
-        values["count"]++;
+        guess = int.parse(request.uri.queryParameters["guess"]);
+        session["count"]++;
         noGuess = false;
       } on FormatException catch (e) {
         noGuess = true;
       }
     }
-    count = values["count"];
+    count = session["count"];
 
-    response.outputStream.writeString("""
+    response.write("""
 <html>
 <head>
 <title>Number Guessing Game</title>
@@ -59,18 +55,18 @@ class TheHandler implements WrappedRequestHandler {
 <img src="question.png"/>""");
     if (!noGuess) {
       if (guess > number) {
-        response.outputStream.writeString("<p>${guess} was too high! Try again.</p>");
+        response.write("<p>${guess} was too high! Try again.</p>");
       } else if (guess < number) {
-        response.outputStream.writeString("<p>${guess} was too low! Try again.</p>");
+        response.write("<p>${guess} was too low! Try again.</p>");
       } else {
-        response.outputStream.writeString("<p>Correct! Got it in ${count}. Let's do that again.</p>");
-        values["number"] = rnd.nextInt(100);
-        count = values["count"] = 0;
+        response.write("<p>Correct! Got it in ${count}. Let's do that again.</p>");
+        session["number"] = rnd.nextInt(100);
+        count = session["count"] = 0;
       }
     } else {
-      response.outputStream.writeString("<p>I've thought of a number. What do you think it is?</p>");
+      response.write("<p>I've thought of a number. What do you think it is?</p>");
     }
-    response.outputStream.writeString("""
+    response.write("""
 <form action="/">
 Guess ${count + 1}
 <input name="guess" />
@@ -78,7 +74,7 @@ Guess ${count + 1}
 </body>
 </html>
 """);
-    response.outputStream.close();
+    response.close();
   }
 }
 
@@ -88,7 +84,7 @@ void main() {
   var notFoundHandler = new NotFoundHandler();
 
   File here = new File(".");
-  String herePath = here.fullPathSync();
+  String herePath = here.absolute.path;
   print("here: $herePath");
   String newPath = "${herePath}/example/numberguess/files";
   var fileHandler = new FileHandler(newPath);

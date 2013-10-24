@@ -77,10 +77,10 @@ class Board {
 
 class NotFoundHandler implements WrappedRequestHandler {
   onRequest(HttpRequest request, HttpResponse response) {
-    response.outputStream.writeString("""
+    response.write("""
 NOT FOUND
 """);
-    response.outputStream.close();
+    response.close();
   }
 }
 
@@ -88,31 +88,29 @@ class TheHandler implements WrappedRequestHandler {
   Math.Random rnd;
   
   TheHandler() {
-    rnd = new Math.Random(new Date.now().millisecondsSinceEpoch);
+    rnd = new Math.Random(new DateTime.now().millisecondsSinceEpoch);
   }
   
   onRequest(HttpRequest request, HttpResponse response) {
     print("request received");
     response.statusCode = HttpStatus.OK;
-    response.outputStream.writeString("Hello");
+    response.write("Hello");
     throw "oops";
 
-    HttpSession session = request.session();
-    if (session.data == null) {
-      session.data = new Map<String, dynamic>();
+    HttpSession session = request.session;
+    if (session.isNew) {
       var board = new Board();
-      session.data["board"] = new Board();
+      session["board"] = new Board();
     }
-    var board = session.data["board"];
+    var board = session["board"];
     if (board.whoWon() != " ") {
       board.restart();
     }
-    Map<String, dynamic> values = session.data;
     print("got session");
     var error = "";
-    if (request.queryParameters["move"] != null) {
+    if (request.uri.queryParameters["move"] != null) {
       try {
-        var move = int.parse(request.queryParameters["move"]);
+        var move = int.parse(request.uri.queryParameters["move"]);
         board.move(move, "X");
         board.aiMove("O");
       } catch (e) {
@@ -125,7 +123,7 @@ class TheHandler implements WrappedRequestHandler {
       won = "${board.whoWon()} won";
     }
 
-    response.outputStream.writeString("""
+    response.write("""
 <html>
 <head>
 <title>XandO</title>
@@ -133,7 +131,7 @@ class TheHandler implements WrappedRequestHandler {
 <body>
 <h1>XandO</h1>
 <pre>
-${session.data["board"].toString()}
+${session["board"].toString()}
 </pre>
 ${error}
 ${won}
@@ -144,7 +142,7 @@ Your Move:
 </body>
 </html>
 """);
-    response.outputStream.close();
+    response.close();
   }
 }
 

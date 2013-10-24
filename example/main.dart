@@ -25,7 +25,7 @@ class SqlHandler extends DbHandler {
 
   onRequest(HttpRequest request, HttpResponse response) {
     void writeIt(var fieldNames, var results) {
-      response.outputStream.writeString("""
+      response.write("""
 <html>
 <head>
 <title>Test</title>
@@ -39,12 +39,12 @@ class SqlHandler extends DbHandler {
 <p>${results}</p>
 </body>
 </html>""");
-      response.outputStream.close();
+      response.close();
     };
-    if (request.queryParameters["sql"] != null) {
+    if (request.uri.queryParameters["sql"] != null) {
       connect().then((x) {
         print("connected");
-        return _pool.query(request.queryParameters["sql"]);
+        return _pool.query(request.uri.queryParameters["sql"]);
       }).then((Results results) {
         print("got results");
         _pool.close();
@@ -70,25 +70,24 @@ class TheHandler extends DbHandler {
     response.statusCode = HttpStatus.OK;
 
     String name = "";
-    var session = request.session();
-    if (session.data == null) {
-      session.data = new Map<String, dynamic>();
+    var session = request.session;
+    if (session.isNew) {
       print("new session");
     } else {
       print("got session");
-      if (request.queryParameters["name"] != null) {
+      if (request.uri.queryParameters["name"] != null) {
         print("got param");
-        name = request.queryParameters["name"];
+        name = request.uri.queryParameters["name"];
         print("name is $name");
-        session.data["name"] = name;
+        session["name"] = name;
         print("stored name");
       } else {
         print("get naem from session");
-        name = session.data["name"];
+        name = session["name"];
         print("name is $name");
       }
     }
-    response.outputStream.writeString("""
+    response.write("""
 <html>
 <head>
 <title>Welcome</title>
@@ -101,7 +100,7 @@ class TheHandler extends DbHandler {
 </body>
 </html>
 """);
-    response.outputStream.close();
+    response.close();
   }
 }
 
@@ -120,17 +119,17 @@ void main() {
   var queryHandler = new SqlHandler(user, password, host, db, port);
   
   File here = new File(".");
-  String herePath = here.fullPathSync();
+  String herePath = here.absolute.path;
   print("here: $herePath");
   String newPath = "${herePath}/example/files";
 
   var fileHandler = new FileHandler(newPath);
   server.listen('127.0.0.1', 8080);
   server.addRequestHandler((HttpRequest request) {
-    return request.path == "/query";
+    return request.uri.path == "/query";
   }, queryHandler);
   server.addRequestHandler((HttpRequest request) {
-    return request.path.endsWith(".png") || request.path.endsWith(".txt") || request.path.endsWith(".ico"); 
+    return request.uri.path.endsWith(".png") || request.uri.path.endsWith(".txt") || request.uri.path.endsWith(".ico"); 
   }, fileHandler);
   server.defaultRequestHandler = handler;
 }

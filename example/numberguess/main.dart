@@ -87,6 +87,9 @@ void main() {
   String herePath = here.absolute.path;
   print("here: $herePath");
   String newPath = "${herePath}/example/numberguess/files";
+  if (herePath.endsWith("/numberguess/.")) {
+    newPath = "${herePath}/files";
+  }
   var fileHandler = new FileHandler(newPath);
   fileHandler.notFoundHandler = notFoundHandler;
   

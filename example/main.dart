@@ -122,6 +122,9 @@ void main() {
   String herePath = here.absolute.path;
   print("here: $herePath");
   String newPath = "${herePath}/example/files";
+  if (herePath.endsWith("/example/.")) {
+    newPath = "${herePath}/files";
+  }
 
   var fileHandler = new FileHandler(newPath);
   server.listen('127.0.0.1', 8080);

@@ -137,6 +137,9 @@ void main() {
   String herePath = here.absolute.path;
   print("here: $herePath");
   String newPath = "${herePath}/example/photocompare/files";
+  if (herePath.endsWith("/photocompare/.")) {
+    newPath = "${herePath}/files";
+  }
   var fileHandler = new FileHandler(newPath);
   fileHandler.notFoundHandler = notFoundHandler;
   var handler = new TheHandler(newPath);

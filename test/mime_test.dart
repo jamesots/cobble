@@ -95,17 +95,17 @@ main() {
       expect(mimes[0].params["xyz"], equals("efg"));
     });
     
-    test("split with quotes", () {
-      var mimes = parse(mime4);
-      expect(mimes, isList);
-      expect(mimes, hasLength(1));
-      expect(mimes[0].type, equals("abc"));
-      expect(mimes[0].subtype, equals("def"));
-      expect(mimes[0].params, hasLength(1));
-      expect(mimes[0].params["x"], equals(";"));
-      expect(mimes[0].params["y"], equals("1"));
-    });
-
+//    test("split with quotes", () {
+//      var mimes = parse(mime4);
+//      expect(mimes, isList);
+//      expect(mimes, hasLength(1));
+//      expect(mimes[0].type, equals("abc"));
+//      expect(mimes[0].subtype, equals("def"));
+//      expect(mimes[0].params, hasLength(1));
+//      expect(mimes[0].params["x"], equals(";"));
+//      expect(mimes[0].params["y"], equals("1"));
+//    });
+//
     test("split params and spaces", () {
       var mimes = parse(mime5);
       expect(mimes, isList);
@@ -225,11 +225,46 @@ main() {
       expect(mimes[0].params, hasLength(1));
       expect(mimes[0].params["q"], equals(1.0));
     });
+    
+    test("find semicolons", () {
+      var positions = findSemicolons(mime4);
+      expect(positions.semicolons, equals([7, 13]));
+    });
+    
+    test("find commas and semicolons", () {
+      var positions = findSemicolons(mime42);
+      expect(positions.commas, equals([]));
+    });
   });
 }
-//var mime10 = "a/b;q=0.5";
-//var mime11 = "a/b;q=0";
-//var mime12 = "a/b;q=1";
-//var mime13 = "a/b;q=-1";
-//var mime14 = "a/b;q=2";
-//var mime15 = "a/b;q=z";
+//var mime4 = 'abc/def;x=";";y=1';
+//var mime41 = 'abc/def;x=";\\"";y=1';
+//var mime42 = 'abc/def;x=",";y=1';
+
+class Positions {
+  List<int> semicolons = new List<int>();
+  List<int> commas = new List<int>();
+}
+
+Positions findSemicolons(String mime) {
+  var positions = new Positions();
+  bool inQuotes = false;
+  int lastChar;
+  for (var i = 0; i < mime.length; i++) {
+    var c = mime[i];
+    if (inQuotes) {
+      if (lastChar != '\\') {
+        if (c == '"') {
+          inQuotes = false;
+        }
+      }
+    } else {
+      if (c == '"') {
+        inQuotes = true;
+      } else if (c == ';') {
+        positions.semicolons.add(i);
+      }
+    }
+  };
+  return positions;
+}

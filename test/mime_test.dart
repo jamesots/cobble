@@ -6,6 +6,8 @@ var mime3 = "abc/def;xyz=efg";
 var mime4 = 'abc/def;x=";";y=1';
 var mime41 = 'abc/def;x=";\\"";y=1';
 var mime42 = 'abc/def;x=",";y=1';
+var mime43 = 'a/b;x=",",c/d';
+var mime44 = 'a/b;x=",",c/d;x=y';
 var mime5 = "abc/def ; xyz=0.2";
 var mime6 = "abc/def ; a=1 ; b=2";
 var mime7 = "abc/def;a=1;b=2";
@@ -31,24 +33,38 @@ class AcceptRange {
 
 List<AcceptRange> parse(String accept) {
   var ranges = new List<AcceptRange>();
-  var splits = accept.split(",");
-  splits.forEach((split) {
-    var params = split.split(";");
-    var type = params[0];
+  
+  var positions = findPositions(accept);
+  positions.commas.add(accept.length);
+  positions.semicolons.add(new List<int>());
+  
+  var lastComma = 0;
+  for (var i = 0; i < positions.commas.length; i++) {
+    var commaPos = positions.commas[i];
+    var split = accept.substring(lastComma, commaPos);
+    lastComma = commaPos + 1;
+
+    positions.semicolons[i].add(split.length);
+    var lastSemicolon = positions.semicolons[i][0];
+    var type = split.substring(0, lastSemicolon);
     if (type == "*") {
       type = "*/*";
     };
     var parts = type.split("/");
     var range = new AcceptRange(parts[0].trim(), parts[1].trim());
     ranges.add(range);
-    params.removeRange(0, 1);
-    params.forEach((param) {
+
+    lastSemicolon++;
+    for (var ii = 1; ii < positions.semicolons[i].length; ii++) {
+      var semicolonPos = positions.semicolons[i][ii];
+      var param = split.substring(lastSemicolon, semicolonPos);
+      lastSemicolon = semicolonPos + 1;
       var paramParts = param.split("=");
       var paramName = paramParts[0].trim();
       var paramValue = paramParts[1].trim();
       range.params[paramName] = paramValue;
-    });
-  });
+    };
+  };
   return ranges;
 }
 
@@ -95,17 +111,17 @@ main() {
       expect(mimes[0].params["xyz"], equals("efg"));
     });
     
-//    test("split with quotes", () {
-//      var mimes = parse(mime4);
-//      expect(mimes, isList);
-//      expect(mimes, hasLength(1));
-//      expect(mimes[0].type, equals("abc"));
-//      expect(mimes[0].subtype, equals("def"));
-//      expect(mimes[0].params, hasLength(1));
-//      expect(mimes[0].params["x"], equals(";"));
-//      expect(mimes[0].params["y"], equals("1"));
-//    });
-//
+    test("split with quotes", () {
+      var mimes = parse(mime4);
+      expect(mimes, isList);
+      expect(mimes, hasLength(1));
+      expect(mimes[0].type, equals("abc"));
+      expect(mimes[0].subtype, equals("def"));
+      expect(mimes[0].params, hasLength(2));
+      expect(mimes[0].params["x"], equals('";"'));
+      expect(mimes[0].params["y"], equals("1"));
+    });
+
     test("split params and spaces", () {
       var mimes = parse(mime5);
       expect(mimes, isList);
@@ -227,29 +243,40 @@ main() {
     });
     
     test("find semicolons", () {
-      var positions = findSemicolons(mime4);
-      expect(positions.semicolons, equals([7, 13]));
+      var positions = findPositions(mime4);
+      expect(positions.semicolons, equals([[7, 13]]));
     });
     
     test("find commas and semicolons", () {
-      var positions = findSemicolons(mime42);
+      var positions = findPositions(mime42);
       expect(positions.commas, equals([]));
+    });
+    
+    test("find commas and semicolons", () {
+      var positions = findPositions(mime43);
+      expect(positions.commas, equals([9]));
+    });
+    
+    test("find commas and semicolons", () {
+      var positions = findPositions(mime44);
+      expect(positions.commas, equals([9]));
+      expect(positions.semicolons, equals([[3], [3]]));
     });
   });
 }
-//var mime4 = 'abc/def;x=";";y=1';
-//var mime41 = 'abc/def;x=";\\"";y=1';
-//var mime42 = 'abc/def;x=",";y=1';
 
 class Positions {
-  List<int> semicolons = new List<int>();
   List<int> commas = new List<int>();
+  List<List<int>> semicolons = new List<List<int>>();
 }
 
-Positions findSemicolons(String mime) {
+Positions findPositions(String mime) {
   var positions = new Positions();
+  var semicolons = new List<int>();
+  positions.semicolons.add(semicolons);
   bool inQuotes = false;
-  int lastChar;
+  String lastChar;
+  int lastComma = 0;
   for (var i = 0; i < mime.length; i++) {
     var c = mime[i];
     if (inQuotes) {
@@ -262,7 +289,12 @@ Positions findSemicolons(String mime) {
       if (c == '"') {
         inQuotes = true;
       } else if (c == ';') {
-        positions.semicolons.add(i);
+        semicolons.add(i - lastComma);
+      } else if (c == ',') {
+        positions.commas.add(i);
+        semicolons = new List<int>();
+        positions.semicolons.add(semicolons);
+        lastComma = i + 1;
       }
     }
   };

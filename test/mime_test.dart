@@ -19,6 +19,7 @@ var mime12 = "a/b;q=1";
 var mime13 = "a/b;q=-1";
 var mime14 = "a/b;q=2";
 var mime15 = "a/b;q=z";
+var mime16 = 'a/b;q="x=y"';
 
 //TODO should send 406 Not Acceptable if, er, not acceptable
 
@@ -59,9 +60,9 @@ List<AcceptRange> parse(String accept) {
       var semicolonPos = positions.semicolons[i][ii];
       var param = split.substring(lastSemicolon, semicolonPos);
       lastSemicolon = semicolonPos + 1;
-      var paramParts = param.split("=");
-      var paramName = paramParts[0].trim();
-      var paramValue = paramParts[1].trim();
+      var equalsPos = param.indexOf("=");
+      var paramName = param.substring(0, equalsPos).trim();
+      var paramValue = param.substring(equalsPos + 1).trim();
       range.params[paramName] = paramValue;
     };
   };
@@ -176,6 +177,15 @@ main() {
       expect(mimes[0].subtype, equals("*"));
     });
 
+    test("split malformed", () {
+      var mimes = parse(mime16);
+      expect(mimes, isList);
+      expect(mimes, hasLength(1));
+      expect(mimes[0].type, equals("a"));
+      expect(mimes[0].subtype, equals("b"));
+      expect(mimes[0].params["q"], equals('"x=y"'));
+    });
+
     test("mid q", () {
       var mimes = parse(mime10);
       updateQValues(mimes);
@@ -262,6 +272,12 @@ main() {
       expect(positions.commas, equals([9]));
       expect(positions.semicolons, equals([[3], [3]]));
     });
+
+    test("find commas and semicolons", () {
+      var positions = findPositions(mime41);
+      expect(positions.commas, equals([]));
+      expect(positions.semicolons, equals([[7, 15]]));
+    });
   });
 }
 
@@ -285,6 +301,7 @@ Positions findPositions(String mime) {
           inQuotes = false;
         }
       }
+      lastChar = c;
     } else {
       if (c == '"') {
         inQuotes = true;

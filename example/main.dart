@@ -130,9 +130,9 @@ void main() {
   server.listen('127.0.0.1', 8080);
   server.addRequestHandler((HttpRequest request) {
     return request.uri.path == "/query";
-  }, queryHandler);
+  }, queryHandler.onRequest);
   server.addRequestHandler((HttpRequest request) {
     return request.uri.path.endsWith(".png") || request.uri.path.endsWith(".txt") || request.uri.path.endsWith(".ico"); 
-  }, fileHandler);
+  }, fileHandler.onRequest);
   server.defaultRequestHandler = handler;
 }

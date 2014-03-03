@@ -4,20 +4,20 @@ abstract class RequestHandler {
   void onRequest(HttpRequest request, HttpResponse response);
 }
 
-typedef void RequestHandlerMethod(HttpRequest request, HttpResponse response);
+typedef dynamic RequestHandlerMethod(HttpRequest request, HttpResponse response);
 
-typedef void ErrorHandlerMethod(HttpRequest request, HttpResponse response, var error);
+typedef dynamic ErrorHandlerMethod(HttpRequest request, HttpResponse response, var error);
 
 typedef bool Matcher(HttpRequest request);
 
 class Server {
   HttpServer _server;
   ErrorHandlerMethod _errorHandler;
-  Map<Matcher, RequestHandler> _handlers;
-  RequestHandler _defaultHandler;
+  Map<Matcher, RequestHandlerMethod> _handlers;
+  RequestHandlerMethod _defaultHandler;
   
   Server() {
-    _handlers = new Map<Matcher, RequestHandler>();
+    _handlers = new Map<Matcher, RequestHandlerMethod>();
   }
   
   Future listen(String host, int port) {
@@ -27,26 +27,26 @@ class Server {
     });
   }
   
-  addRequestHandler(Matcher matcher, RequestHandler handler) {
+  addRequestHandler(Matcher matcher, RequestHandlerMethod handler) {
     _handlers[matcher] = handler;
   }
   
-  set defaultRequestHandler(RequestHandler handler) => _defaultHandler = handler;
-  RequestHandler get defaultRequestHandler => _defaultHandler;
+  set defaultRequestHandler(RequestHandlerMethod handler) => _defaultHandler = handler;
+  RequestHandlerMethod get defaultRequestHandler => _defaultHandler;
   
   void handleRequest(HttpRequest request) {
     _handlers.keys.firstWhere((matcher) {
       if (matcher(request)) {
-        _handlers[matcher].onRequest(request, request.response);
+        _handlers[matcher](request, request.response);
         return true;
       }
       return false;
     }, orElse: () {
-      _defaultHandler.onRequest(request, request.response);
+      _defaultHandler(request, request.response);
     });
   }
   
-  void mapRequestHandlers(Map<String, RequestHandler> map) {
+  void mapRequestHandlers(Map<String, RequestHandlerMethod> map) {
     for (var key in map.keys) {
       RegExp re = new RegExp(key);
       addRequestHandler((HttpRequest request) {

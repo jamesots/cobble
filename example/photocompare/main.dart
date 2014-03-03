@@ -2,13 +2,11 @@ import 'package:dartwebserver/webserver.dart';
 import 'dart:io';
 import 'dart:math' as Math;
 
-class NotFoundHandler implements RequestHandler {
-  onRequest(HttpRequest request, HttpResponse response) {
-    response.write("""
+notFoundHandler(HttpRequest request, HttpResponse response) {
+  response.write("""
 NOT FOUND
 """);
-    response.close();
-  }
+  response.close();
 }
 
 class TheHandler implements RequestHandler {
@@ -133,7 +131,6 @@ Which image do you prefer?
 
 void main() {
   var server = new Server();
-  var notFoundHandler = new NotFoundHandler();
 
   File here = new File(".");
   String herePath = here.absolute.path;
@@ -150,7 +147,7 @@ void main() {
   server.defaultRequestHandler = notFoundHandler;
   
   server.mapRequestHandlers({
-    r"^/$": handler,
-    r"\.(png|txt|gif|html|jpg)$": fileHandler
+    r"^/$": handler.onRequest,
+    r"\.(png|txt|gif|html|jpg)$": fileHandler.onRequest
   });
 }

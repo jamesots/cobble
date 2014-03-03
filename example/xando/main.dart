@@ -75,13 +75,11 @@ class Board {
   }
 }
 
-class NotFoundHandler implements RequestHandler {
-  onRequest(HttpRequest request, HttpResponse response) {
-    response.write("""
+notFoundHandler(HttpRequest request, HttpResponse response) {
+  response.write("""
 NOT FOUND
 """);
-    response.close();
-  }
+  response.close();
 }
 
 class TheHandler implements RequestHandler {
@@ -121,21 +119,21 @@ class TheHandler implements RequestHandler {
 
     response.write("""
 <html>
-<head>
-<title>XandO</title>
-</head>
-<body>
-<h1>XandO</h1>
-<pre>
+  <head>
+    <title>XandO</title>
+  </head>
+  <body>
+    <h1>XandO</h1>
+    <pre>
 ${session["board"].toString()}
-</pre>
-${error}
-${won}
-<form action="/">
-Your Move:
-<input name="move" />
-</form>
-</body>
+    </pre>
+    ${error}
+    ${won}
+    <form action="/">
+      Your Move:
+      <input name="move" />
+    </form>
+  </body>
 </html>
 """);
     response.close();
@@ -145,13 +143,12 @@ Your Move:
 void main() {
   var server = new Server();
   var handler = new TheHandler();
-  var notFoundHandler = new NotFoundHandler();
 
   server.listen('127.0.0.1', 8081);
   server.defaultRequestHandler = notFoundHandler;
   
   server.mapRequestHandlers({
 //    r"x": "hello",
-    r"^/$": handler
+    r"^/$": handler.onRequest
   });
 }

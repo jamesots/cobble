@@ -8,13 +8,13 @@ class FileHandler implements RequestHandler {
     _trim = trim;
   }
   
-  RequestHandler _notFoundHandler;
-  RequestHandler _forbiddenHandler;
+  RequestHandlerMethod _notFoundHandler;
+  RequestHandlerMethod _forbiddenHandler;
   
-  RequestHandler get notFoundHandler => _notFoundHandler;
+  RequestHandlerMethod get notFoundHandler => _notFoundHandler;
                         set notFoundHandler(var value) => _notFoundHandler = value;
   
-  RequestHandler get forbiddenHandler => _forbiddenHandler;
+  RequestHandlerMethod get forbiddenHandler => _forbiddenHandler;
                         set forbiddenHandler(var value) => _forbiddenHandler = value;
   
   onRequest(HttpRequest request, HttpResponse response) {
@@ -27,7 +27,7 @@ class FileHandler implements RequestHandler {
     if (!file.existsSync()) {
       print("File doesn't exist: ${newPath}");
       if (_notFoundHandler != null) {
-        _notFoundHandler.onRequest(request, response);
+        _notFoundHandler(request, response);
       } else {
         response.statusCode = HttpStatus.NOT_FOUND;
         response.write("Not found!");
@@ -40,7 +40,7 @@ class FileHandler implements RequestHandler {
     if (!filePath.startsWith(_path)) {
       print("Trying to load file outsite of file directory: ${file.absolute.path}");
       if (_forbiddenHandler != null) {
-        _forbiddenHandler.onRequest(request, response);
+        _forbiddenHandler(request, response);
       } else {
         response.statusCode = HttpStatus.FORBIDDEN;
         response.write("Go away!");

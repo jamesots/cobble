@@ -45,8 +45,8 @@ class Server {
       }, orElse: () {
         _defaultHandler(request, request.response);
       });
-    }, onError: (e) {
-      print("Exception while handling request: $e");
+    }, onError: (e, s) {
+      print("Exception while handling request: $e\n$s");
     });
   }
   

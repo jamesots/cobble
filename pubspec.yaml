@@ -1,5 +1,5 @@
 name: dartwebserver
-version: 0.0.6
+version: 0.0.7
 description: A web server
 dependencies:
   logging: any

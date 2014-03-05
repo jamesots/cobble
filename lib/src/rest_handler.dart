@@ -76,19 +76,11 @@ abstract class RestHandler extends RequestHandler {
   }
   
   Future<String> readAll(HttpRequest request) {
-    return request.join();
-//    var completer = new Completer<String>();
-//    var payloadStream = new StringInputStream(request.inputStream);
-//    var payload = new StringBuffer();
-//    payloadStream.onLine = () {
-//      var line;
-//      while ((line = payloadStream.readLine()) != null) {
-//        payload.add(line);
-//      }
-//    };
-//    payloadStream.onClosed = () {
-//      completer.complete(payload.toString());
-//    };
-//    return completer.future;
+    var body = [];
+    var c = new Completer<String>();
+    request.listen((List<int> buffer) => body.add(buffer),
+        onDone: () => c.complete(new String.fromCharCode(body)),
+        onError: (e) => c.completeError(e));  
+    return c.future;
   }
 }

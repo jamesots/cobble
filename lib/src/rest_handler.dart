@@ -74,8 +74,4 @@ abstract class RestHandler extends RequestHandler {
   onDelete(HttpRequest request, HttpResponse response) {
     notAllowed(request, response);
   }
-  
-  Future<String> readAll(HttpRequest request) {
-    return request.join().then((chars) => new String.fromCharCodes(chars));
-  }
 }

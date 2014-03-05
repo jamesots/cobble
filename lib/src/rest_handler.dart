@@ -76,11 +76,6 @@ abstract class RestHandler extends RequestHandler {
   }
   
   Future<String> readAll(HttpRequest request) {
-    var body = [];
-    var c = new Completer<String>();
-    request.listen((List<int> buffer) => body.add(buffer),
-        onDone: () => c.complete(new String.fromCharCode(body)),
-        onError: (e) => c.completeError(e));  
-    return c.future;
+    return request.join().then((chars) => new String.fromCharCodes(chars));
   }
 }

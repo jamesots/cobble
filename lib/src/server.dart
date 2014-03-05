@@ -35,14 +35,18 @@ class Server {
   RequestHandlerMethod get defaultRequestHandler => _defaultHandler;
   
   void handleRequest(HttpRequest request) {
-    _handlers.keys.firstWhere((matcher) {
-      if (matcher(request)) {
-        _handlers[matcher](request, request.response);
-        return true;
-      }
-      return false;
-    }, orElse: () {
-      _defaultHandler(request, request.response);
+    runZoned(() {
+      _handlers.keys.firstWhere((matcher) {
+        if (matcher(request)) {
+          _handlers[matcher](request, request.response);
+          return true;
+        }
+        return false;
+      }, orElse: () {
+        _defaultHandler(request, request.response);
+      });
+    }, onError: (e) {
+      print("Exception while handling request: $e");
     });
   }
   

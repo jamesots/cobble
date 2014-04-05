@@ -4,3 +4,4 @@
 connection.options
 pubspec.lock
 packages
+*.iml

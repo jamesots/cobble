@@ -6,3 +6,4 @@ dependencies:
   options_file: any
   sqljocky: any
   unittest: any
+  mime: any

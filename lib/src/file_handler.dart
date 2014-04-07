@@ -3,11 +3,31 @@ part of webserver;
 typedef String MimeResolverMethod(File file);
 
 class FileHandler implements RequestHandler {
-  String _path;
+  Directory _path;
+
   String _trim;
 
-  FileHandler(String path, {String trim}) {
-    _path = path;
+  /**
+   * Create a FileHandler which serves files from the given [path].
+   * If [trim] is specified, then any request URIs must start with
+   * that string, which is then removed before trying to find the file.
+   */
+  FileHandler(String dir, {String trim}) {
+    if (!path.isAbsolute(dir)) {
+      throw "Path must be absolute: $dir";
+    }
+    if (!new Directory(dir).existsSync()) {
+      throw "Directory must exist: $dir";
+    }
+    _path = path.normalize(dir);
+    if (trim != null) {
+      if (!trim.startsWith("/")) {
+        throw "Trim must start with /";
+      }
+      if (!trim.endsWith("/")) {
+        throw "Trim must start with /";
+      }
+    }
     _trim = trim;
   }
   
@@ -70,7 +90,7 @@ class FileHandler implements RequestHandler {
     if (_trim != null && path.startsWith(_trim)) {
       path = path.substring(_trim.length);
     }
-    String newPath = "${_path}${path}";
+    String newPath = "${_path}/${path}";
     return newPath;
   }
 
@@ -82,8 +102,8 @@ class FileHandler implements RequestHandler {
       return;
     }
     String filePath = file.absolute.path;
-    
-    if (!filePath.startsWith(_path)) {
+
+    if (!path.isWithin(_path, file.path)) {
       _fileOutsideOfDirectory(file, request, response);
     } else {
       _sendFile(response, file);

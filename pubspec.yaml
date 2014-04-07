@@ -1,9 +1,11 @@
 name: dartwebserver
-version: 0.0.8
+version: 0.0.9
 description: A web server
 dependencies:
   logging: any
   options_file: any
   sqljocky: any
-  unittest: any
   mime: any
+  path: any
+dev_dependencies:
+  unittest: any

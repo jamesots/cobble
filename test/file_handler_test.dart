@@ -1,8 +1,7 @@
 library file_handler_test;
 
-import 'package:unittest/unittest.dart';
-import 'package:unittest/mock.dart';
-import 'package:path/path.dart' as path;
+import 'package:test/test.dart';
+import 'package:mockito/mockito.dart';
 
 import 'dart:io';
 import 'dart:async';

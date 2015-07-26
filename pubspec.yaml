@@ -8,4 +8,5 @@ dependencies:
   mime: any
   path: any
 dev_dependencies:
-  unittest: any
+  test: ">=0.12.3 <0.13.0"
+  mockito: ">=0.10.1 <0.11.0"

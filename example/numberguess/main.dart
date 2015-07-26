@@ -1,4 +1,4 @@
-import 'package:dartwebserver/webserver.dart';
+import 'package:cobble/cobble.dart';
 import 'dart:io';
 import 'dart:math' as Math;
 
@@ -43,6 +43,7 @@ class TheHandler implements RequestHandler {
     }
     count = session["count"];
 
+    response.headers.set(HttpHeaders.CONTENT_TYPE, 'text/html');
     response.write("""
 <html>
 <head>

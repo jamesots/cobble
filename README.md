@@ -28,8 +28,8 @@ You can also add request handlers with matchers:
 Or you can map request handlers using regular expressions:
 
     server.mapRequestHandlers({
-        '.*\\.html$': htmlRequestHandler,
-        '/css/.*': cssRequestHandler
+        r'.*\.html$': htmlRequestHandler,
+        r'/css/.*': cssRequestHandler
     });
 
 Finally, it also supports REST requests. Anything added as a REST handler will only be
@@ -37,8 +37,8 @@ called either when the method is DELETE, or the method isn't DELETE and the
 accepted content type is application/json:
 
     server.mapRestHandlers({
-        '/farm/cow': cowRestHandler,
-        '/farm/horse': horseRestHandler
+        r'/farm/cow': cowRestHandler,
+        r'/farm/horse': horseRestHandler
     });
 
 The rest handlers need to be a subclass of RestHandler:
@@ -56,7 +56,7 @@ The rest handlers need to be a subclass of RestHandler:
     }
 
     server.mapRestHandlers({
-        '/farm/cow': new CowRestHandler().onRequest
+        r'/farm/cow': new CowRestHandler().onRequest
     }
 
 There's also a FileHandler class to server files. This FileHandler will server files
@@ -66,7 +66,7 @@ The path is validated so that the user can't get at files outside of the specifi
 Appropriate mime types and error codes should be served.
 
     server.mapRequestHandlers({
-        '/resources/.*': new FileHandler('/var/stuff/res', '/resources/')
+        r'/resources/.*': new FileHandler('/var/stuff/res', '/resources/')
     }
 
 If it is being used in Google App Engine, you can do this:

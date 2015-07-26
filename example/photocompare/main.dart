@@ -1,4 +1,4 @@
-import 'package:dartwebserver/webserver.dart';
+import 'package:cobble/cobble.dart';
 import 'dart:io';
 import 'dart:math' as Math;
 
@@ -91,6 +91,7 @@ class TheHandler implements RequestHandler {
       }
     }
     var image = session["files"][maxitem];
+    response.headers.set(HttpHeaders.CONTENT_TYPE, 'text/html');
     response.write("""
 <html>
 <head>
@@ -107,6 +108,7 @@ class TheHandler implements RequestHandler {
   }
   
   showPage(HttpResponse response, String image1, String image2) {
+    response.headers.set(HttpHeaders.CONTENT_TYPE, 'text/html');
     response.write("""
 <html>
 <head>

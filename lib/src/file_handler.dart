@@ -3,7 +3,7 @@ part of webserver;
 typedef String MimeResolverMethod(File file);
 
 class FileHandler implements RequestHandler {
-  Directory _path;
+  String _path;
 
   String _trim;
 

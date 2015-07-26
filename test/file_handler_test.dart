@@ -38,7 +38,7 @@ class MockResponse extends Mock implements HttpResponse {
 main() {
   group("file handler", () {
     test("should not serve non-existent files", () {
-      var handler = new FileHandler(new Directory(".").absolute.path);
+      var handler = new FileHandler(new Directory("test").absolute.path);
 
       var request = new MockRequest();
       request.uri = new Uri.http("localhost", "/bob");
@@ -50,7 +50,7 @@ main() {
     });
 
     test("should not serve files outside the directory", () {
-      var handler = new FileHandler(new Directory(".").absolute.path);
+      var handler = new FileHandler(new Directory("test").absolute.path);
 
       var request = new MockRequest();
       request.uri = new Uri.http("localhost", "../pubspec.yaml");
@@ -62,7 +62,7 @@ main() {
     });
 
     test("should serve files in directory", () {
-      var handler = new FileHandler(new Directory(".").absolute.path);
+      var handler = new FileHandler(new Directory("test").absolute.path);
 
       var request = new MockRequest();
       request.uri = new Uri.http("localhost", "test.txt");
@@ -74,7 +74,7 @@ main() {
     });
 
     test("should trim path", () {
-      var handler = new FileHandler(new Directory(".").absolute.path, trim: "/xyz/");
+      var handler = new FileHandler(new Directory("test").absolute.path, trim: "/xyz/");
 
       var request = new MockRequest();
       request.uri = new Uri.http("localhost", "/xyz/test.txt");

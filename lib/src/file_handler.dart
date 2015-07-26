@@ -1,7 +1,13 @@
 part of cobble;
 
+/**
+ * A method which takes a [file] and returns its mime type.
+ */
 typedef String MimeResolverMethod(File file);
 
+/**
+ * A [RequestHandler] which serves files.
+ */
 class FileHandler implements RequestHandler {
   String _path;
 
@@ -34,13 +40,27 @@ class FileHandler implements RequestHandler {
   RequestHandlerMethod _notFoundHandler;
   RequestHandlerMethod _forbiddenHandler;
   MimeResolverMethod _mimeResolver;
-  
+
+  /**
+   * The [notFoundHandler] is called when a file is requested which does not exist.
+   * There is a very simple handler installed by default.
+   */
   RequestHandlerMethod get notFoundHandler => _notFoundHandler;
                         set notFoundHandler(var value) => _notFoundHandler = value;
-  
+
+  /**
+   * The [forbiddenHandler] is called when a file is requested which outside of the
+   * directory being served.
+   * There is a very simple handler installed by default.
+   */
   RequestHandlerMethod get forbiddenHandler => _forbiddenHandler;
                         set forbiddenHandler(var value) => _forbiddenHandler = value;
 
+  /**
+   * If [mimeResolver] is set, it is used to determine the mime type to send back
+   * with the file. If it is not set, [mime.lookupMimeType] will be called
+   * (from the 'mime' package).
+   */
   MimeResolverMethod get mimeResolver => _mimeResolver;
                       set mimeResolver(var value) => _mimeResolver = value;
 

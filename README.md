@@ -41,7 +41,7 @@ accepted content type is application/json:
         '/farm/horse': horseRestHandler
     });
 
-You can create a subclass of RestHandler to make handling REST request easier:
+The rest handlers need to be a subclass of RestHandler:
 
     class CowRestHandler extends RestHandler {
         onGet(HttpRequest request, HttpResponse response) {
@@ -68,3 +68,7 @@ Appropriate mime types and error codes should be served.
     server.mapRequestHandlers({
         '/resources/.*': new FileHandler('/var/stuff/res', '/resources/')
     }
+
+If it is being used in Google App Engine, you can do this:
+
+    runAppEngine(server.handleRequest);

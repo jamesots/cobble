@@ -4,12 +4,25 @@ abstract class RequestHandler {
   void onRequest(HttpRequest request, HttpResponse response);
 }
 
+/**
+ * Handles a [request]. [response] is already available as request.response, but
+ * is provided as an argument to the request handler for convenience.
+ */
 typedef dynamic RequestHandlerMethod(HttpRequest request, HttpResponse response);
 
+/**
+ * Not currently used
+ */
 typedef dynamic ErrorHandlerMethod(HttpRequest request, HttpResponse response, var error);
 
+/**
+ * Returns true if the request handler should handle the [request], false otherwise.
+ */
 typedef bool Matcher(HttpRequest request);
 
+/**
+ * A simple web server.
+ */
 class Server {
   HttpServer _server;
   ErrorHandlerMethod _errorHandler;
@@ -19,21 +32,39 @@ class Server {
   Server() {
     _handlers = new Map<Matcher, RequestHandlerMethod>();
   }
-  
+
+  /**
+   * Listen on the given [host] and [port]. For how these arguments are used,
+   * see [HttpServer.bind]
+   */
   Future listen(String host, int port) {
     return HttpServer.bind(host, port).then((server) {
       _server = server;
       server.listen(handleRequest);
     });
   }
-  
+
+  /**
+   * Add a request handler. When deciding whether to use a particular handler,
+   * the [matcher] is first called. Only if it returns true is the [handler] called.
+   *
+   * Matchers are called in the order they were added.
+   */
   addRequestHandler(Matcher matcher, RequestHandlerMethod handler) {
     _handlers[matcher] = handler;
   }
-  
+
+  /**
+   * The [defaultRequestHandler] is called if no other handler matches the request.
+   */
   set defaultRequestHandler(RequestHandlerMethod handler) => _defaultHandler = handler;
   RequestHandlerMethod get defaultRequestHandler => _defaultHandler;
-  
+
+  /**
+   * Handles the HTTP request. If [listen] has been called, this is called internally whenever
+   * an HTTP request arrives. If you are using Google App Engine you can pass this
+   * method to runAppEngine.
+   */
   void handleRequest(HttpRequest request) {
     runZoned(() {
       _handlers.keys.firstWhere((matcher) {
@@ -49,7 +80,15 @@ class Server {
       print("Exception while handling request: $e\n$s");
     });
   }
-  
+
+  /**
+   * Maps request handlers to regular expressions. The regular expressions
+   * are matched against request.uri.path, and if it matches then the
+   * mapped request handler is called.
+   *
+   * The order in which the handlers are called depends on the map
+   * implementation used. Dart's default map literal preserves insertion order.
+   */
   void mapRequestHandlers(Map<String, RequestHandlerMethod> map) {
     for (var key in map.keys) {
       RegExp re = new RegExp(key);
@@ -60,7 +99,20 @@ class Server {
       }, map[key]);
     }
   }
-  
+
+  /**
+   * Maps rest handlers to regular expressions. If the request is a REST request
+   * and request.uri.path matches the regular expression, then the
+   * mapped request handler is called.
+   *
+   * A REST request is defined thusly:
+   *  - Any request whose method is DELETE.
+   *  - Any GET or HEAD request where the Accept header is application/json
+   *  - Any PUT or POST request where the Content-Type header is application/json
+   *
+   * The order in which the handlers are called depends on the map
+   * implementation used. Dart's default map literal preserves insertion order.
+   */
   void mapRestHandlers(Map<String, RestHandler> map) {
     for (var key in map.keys) {
       var matcher = _getRestMatcher(key);
@@ -127,11 +179,17 @@ class Server {
       }
     };
   }
-  
+
+  /**
+   * Not currently used
+   */
   void set errorHandler(ErrorHandlerMethod handler) {
     _errorHandler = handler;
   }
-  
+
+  /**
+   * Not currently used
+   */
   void handleError(HttpRequest request, HttpResponse response, var error) {
     if (_errorHandler == null) {
       _defaultErrorHandler(request, response, error);

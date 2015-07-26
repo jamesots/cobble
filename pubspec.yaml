@@ -1,10 +1,12 @@
 name: cobble
 version: 0.1.0
+author: James Ots <code@jamesots.com>
+homepage: https://github.com/jamesots/cobble
 description: A cobbled together web server
 dependencies:
-  logging: any
-  mime: any
-  path: any
+  logging: ">=0.11.1 <0.12.0"
+  mime: ">=0.9.3 <10.0.0"
+  path: ">=1.3.6 <2.0.0"
 dev_dependencies:
   test: ">=0.12.3 <0.13.0"
   mockito: ">=0.10.1 <0.11.0"

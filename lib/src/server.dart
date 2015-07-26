@@ -1,4 +1,4 @@
-part of webserver;
+part of cobble;
 
 abstract class RequestHandler {
   void onRequest(HttpRequest request, HttpResponse response);

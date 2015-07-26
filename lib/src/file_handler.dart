@@ -1,4 +1,4 @@
-part of webserver;
+part of cobble;
 
 typedef String MimeResolverMethod(File file);
 

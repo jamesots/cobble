@@ -1,10 +1,8 @@
-name: dartwebserver
-version: 0.0.9
-description: A web server
+name: cobble
+version: 0.1.0
+description: A cobbled together web server
 dependencies:
   logging: any
-  options_file: any
-  sqljocky: any
   mime: any
   path: any
 dev_dependencies:

@@ -6,7 +6,7 @@ import 'package:mockito/mockito.dart';
 import 'dart:io';
 import 'dart:async';
 
-import 'package:dartwebserver/webserver.dart';
+import 'package:cobble/cobble.dart';
 
 class MockRequest extends Mock implements HttpRequest {
   Uri uri;

@@ -1,4 +1,4 @@
-part of webserver;
+part of cobble;
 
 class _AuthRequired {
   bool GET;

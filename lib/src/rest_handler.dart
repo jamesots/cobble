@@ -52,7 +52,26 @@ abstract class RestHandler extends RequestHandler {
    * This should not be overridden.
    */
   void onRequest(HttpRequest request, HttpResponse response) {
-    throw "onRequest should not be called on a RestHandler";
+    if (!authenticated(request, response)) {
+      forbidden(request, response);
+    } else {
+      switch (request.method) {
+        case "GET":
+          onGet(request, response);
+          break;
+        case "POST":
+          onPost(request, response);
+          break;
+        case "PUT":
+          onPut(request, response);
+          break;
+        case "DELETE":
+          onDelete(request, response);
+          break;
+        default:
+          methodNotImplemented(request, response);
+      }
+    }
   }
 
   /**

@@ -41,7 +41,8 @@ accepted content type is application/json:
         r'/farm/horse': horseRestHandler
     });
 
-The rest handlers need to be a subclass of RestHandler:
+The rest handlers need to be a subclass of RestHandler (though you can also use a RestHandler
+anywhere else a RequestHandler is needed):
 
     class CowRestHandler extends RestHandler {
         onGet(HttpRequest request, HttpResponse response) {

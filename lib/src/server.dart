@@ -116,7 +116,7 @@ class Server {
   void mapRestHandlers(Map<String, RestHandler> map) {
     for (var key in map.keys) {
       var matcher = _getRestMatcher(key);
-      var handler = _getRestHandler(map[key]);
+      var handler = map[key].onRequest;
       addRequestHandler(matcher, handler);
     }
   }
@@ -151,32 +151,6 @@ class Server {
         }
       }
       return false;
-    };
-  }
-
-  RequestHandlerMethod _getRestHandler(RestHandler restHandler) {
-    return (HttpRequest request, HttpResponse response) {
-      if (!restHandler.authenticated(request, response)) {
-        restHandler.forbidden(request, response);
-      } else {
-        response.headers.add("Content-Type", "application/json");
-        switch (request.method) {
-          case "GET":
-            restHandler.onGet(request, response);
-            break;
-          case "POST":
-            restHandler.onPost(request, response);
-            break;
-          case "PUT": 
-            restHandler.onPut(request, response);
-            break;
-          case "DELETE": 
-            restHandler.onDelete(request, response);
-            break;
-          default:
-            restHandler.methodNotImplemented(request, response);
-        }
-      }
     };
   }
 

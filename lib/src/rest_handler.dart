@@ -42,36 +42,61 @@ abstract class RestHandler extends RequestHandler {
   /**
    * Sends a NOT_IMPLEMENTED (501) response.
    */
-  methodNotImplemented(HttpRequest request, HttpResponse response) {
-    response.statusCode = HttpStatus.NOT_IMPLEMENTED;
-    response.reasonPhrase = "Method not implemented: ${request.method}";
-    response.close();
+  methodNotImplemented(HttpRequest request) {
+    request.response.statusCode = HttpStatus.NOT_IMPLEMENTED;
+    request.response.reasonPhrase = "Method not implemented: ${request.method}";
   }
 
   /**
-   * This should not be overridden.
+   * This should not be overridden. It works out which method handler to
+   * call.
    */
-  void onRequest(HttpRequest request, HttpResponse response) {
-    if (!authenticated(request, response)) {
-      forbidden(request, response);
+  onRequest(HttpRequest request, HttpResponse response) async {
+    if (!authenticated(request)) {
+      forbidden(request);
     } else {
-      switch (request.method) {
-        case "GET":
-          onGet(request, response);
-          break;
-        case "POST":
-          onPost(request, response);
-          break;
-        case "PUT":
-          onPut(request, response);
-          break;
-        case "DELETE":
-          onDelete(request, response);
-          break;
-        default:
-          methodNotImplemented(request, response);
+      response.headers.add("Content-Type", "application/json");
+      try {
+        switch (request.method) {
+          case "GET":
+            var objects = await onGet(request);
+            _writeJsonResponse(response, objects);
+            break;
+          case "POST":
+            var json = await _decodeJsonRequest(request);
+            var objects = await onPost(request, json);
+            _writeJsonResponse(response, objects);
+            break;
+          case "PUT":
+            var json = await _decodeJsonRequest(request);
+            var objects = await onPut(request, json);
+            _writeJsonResponse(response, objects);
+            break;
+          case "DELETE":
+            var json = await _decodeJsonRequest(request);
+            var objects = await onDelete(request, json);
+            _writeJsonResponse(response, objects);
+            break;
+          default:
+            methodNotImplemented(request);
+        }
+      } catch (e) {
+        serverError(request, e);
+        _writeJsonResponse(response, {
+          "exception": e.toString()
+        });
       }
     }
+  }
+
+  _decodeJsonRequest(HttpRequest request) async {
+    var jsonString = await request.transform(UTF8.decoder).join();
+    return JSON.decode(jsonString);
+  }
+
+  _writeJsonResponse(HttpResponse response, json) {
+    response.write(JSON.encode(json));
+    response.close();
   }
 
   /**
@@ -79,15 +104,15 @@ abstract class RestHandler extends RequestHandler {
    * whenever a request comes in which was specified as requiring authentication
    * in the constructor.
    */
-  bool checkAuthenticated(HttpRequest request, HttpResponse response);
+  bool checkAuthenticated(HttpRequest request);
 
   /**
    * Returns [true] if the request is authenticated or doesn't require authentication,
    * [false] otherwise.
    */
-  bool authenticated(HttpRequest request, HttpResponse response) {
+  bool authenticated(HttpRequest request) {
     if (_authRequired.requiredFor(request.method)) {
-      return checkAuthenticated(request, response);
+      return checkAuthenticated(request);
     }
     return true;
   }
@@ -95,46 +120,81 @@ abstract class RestHandler extends RequestHandler {
   /**
    * Sends a FORBIDDEN (403) response.
    */
-  void forbidden(HttpRequest request, HttpResponse response) {
-    response.statusCode = HttpStatus.FORBIDDEN;
-    response.reasonPhrase = "Forbidden";
-    response.close();
+  void forbidden(HttpRequest request) {
+    request.response.statusCode = HttpStatus.FORBIDDEN;
+    request.response.reasonPhrase = "Forbidden";
   }
 
   /**
    * Sends a METHOD_NOT_ALLOWED (405) response.
    */
-  void notAllowed(HttpRequest request, HttpResponse response) {
-    response.statusCode = HttpStatus.METHOD_NOT_ALLOWED;
-    response.reasonPhrase = "Method not allowed: ${request.method}";
-    response.close();
+  void notAllowed(HttpRequest request) {
+    request.response.statusCode = HttpStatus.METHOD_NOT_ALLOWED;
+    request.response.reasonPhrase = "Method not allowed: ${request.method}";
+  }
+
+  void success(HttpRequest request) {
+    request.response.statusCode = HttpStatus.OK;
+    request.response.reasonPhrase = "Success";
+  }
+
+  void conflict(HttpRequest request) {
+    request.response.statusCode = HttpStatus.CONFLICT;
+    request.response.reasonPhrase = "Conflict";
+  }
+
+  void serverError(HttpRequest request, e) {
+    request.response.statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+    request.response.reasonPhrase = "Internal server error";
   }
 
   /**
-   * Override this to handle GET requests. Sends a METHOD_NOT_ALLOWED response by default.
+   * Override this to handle GET requests.
+   *
+   * Return a [Map] which will be returned as JSON to the client.
+   *
+   * Sends a METHOD_NOT_ALLOWED response by default.
    */
-  onGet(HttpRequest request, HttpResponse response) {
-    notAllowed(request, response);
+  Map onGet(HttpRequest request) async {
+    notAllowed(request);
   }
 
   /**
-   * Override this to handle POST requests. Sends a METHOD_NOT_ALLOWED response by default.
+   * Override this to handle POST requests.
+   *
+   * The body of the request is converted into [json] objects.
+   *
+   * Return a [Map] which will be returned as JSON to the client.
+   *
+   * Sends a METHOD_NOT_ALLOWED response by default.
    */
-  onPost(HttpRequest request, HttpResponse response) {
-    notAllowed(request, response);
+   Map onPost(HttpRequest request, dynamic json) async {
+    notAllowed(request);
   }
 
   /**
-   * Override this to handle PUT requests. Sends a METHOD_NOT_ALLOWED response by default.
+   * Override this to handle PUT requests.
+   *
+   * The body of the request is converted into [json] objects.
+   *
+   * Return a [Map] which will be returned as JSON to the client.
+   *
+   * Sends a METHOD_NOT_ALLOWED response by default.
    */
-  onPut(HttpRequest request, HttpResponse response) {
-    notAllowed(request, response);
+  Map onPut(HttpRequest request, dynamic json) async {
+    notAllowed(request);
   }
 
   /**
-   * Override this to handle DELETE requests. Sends a METHOD_NOT_ALLOWED response by default.
+   * Override this to handle DELETE requests.
+   *
+   * The body of the request is converted into [json] objects.
+   *
+   * Return a [Map] which will be returned as JSON to the client.
+   *
+   * Sends a METHOD_NOT_ALLOWED response by default.
    */
-  onDelete(HttpRequest request, HttpResponse response) {
-    notAllowed(request, response);
+  Map onDelete(HttpRequest request, dynamic json) async {
+    notAllowed(request);
   }
 }

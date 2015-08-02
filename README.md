@@ -45,11 +45,13 @@ The rest handlers need to be a subclass of RestHandler (though you can also use 
 anywhere else a RequestHandler is needed):
 
     class CowRestHandler extends RestHandler {
-        onGet(HttpRequest request, HttpResponse response) {
-            // do something useful
+        onGet(HttpRequest request) {
+            return {
+                "cows": getAllTheCows()
+            }
         }
 
-        onPut(HttpRequest request, HttpResponse response) {
+        onPut(HttpRequest request, Map json) {
             // do something useful
         }
 
